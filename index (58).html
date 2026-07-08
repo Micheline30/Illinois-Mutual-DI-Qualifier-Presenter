@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Illinois Mutual — DI Qualifier & Presenter</title>
+<style>
+:root {
+  --navy:#003A70;--blue:#1A4A8A;--accent:#2E75B6;--teal:#006B6B;
+  --green:#1B7A4E;--orange:#C45911;--red:#C00000;--gold:#8B6914;
+  --light:#F0F4F8;--card:#fff;--border:#CBD5E0;--text:#1A202C;--muted:#718096;
+  --lg:#D6EFE3;--lb:#D6E4F0;--lo:#FCE4D6;--ly:#FFF3CD;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--light);color:var(--text);min-height:100vh;}
+
+/* ── HEADER ── */
+.header{background:linear-gradient(135deg,var(--navy) 0%,#1A4A8A 100%);padding:14px 22px;display:flex;align-items:center;gap:14px;box-shadow:0 3px 14px rgba(0,0,0,.3);position:sticky;top:0;z-index:200;}
+.im-logo{background:white;border-radius:7px;padding:5px 13px;font-size:15px;font-weight:900;color:var(--navy);letter-spacing:1px;flex-shrink:0;}
+.header-title h1{color:white;font-size:18px;font-weight:700;}
+.header-title p{color:rgba(255,255,255,.72);font-size:11px;margin-top:1px;}
+.hdr-badges{margin-left:auto;display:flex;gap:7px;flex-wrap:wrap;}
+.hdr-badge{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.35);border-radius:14px;padding:4px 11px;color:white;font-size:10px;font-weight:700;letter-spacing:.4px;white-space:nowrap;}
+.hdr-badge.live{background:rgba(27,122,78,.5);border-color:#48BB78;}
+
+/* ── LAYOUT ── */
+.wrap{max-width:1380px;margin:0 auto;padding:18px;}
+.cols{display:grid;grid-template-columns:360px 1fr;gap:16px;}
+@media(max-width:920px){.cols{grid-template-columns:1fr;}}
+
+/* ── CARDS ── */
+.card{background:var(--card);border-radius:13px;border:1px solid var(--border);box-shadow:0 1px 6px rgba(0,0,0,.06);overflow:hidden;margin-bottom:13px;}
+.card-hdr{padding:10px 15px;font-size:11px;font-weight:700;letter-spacing:.55px;text-transform:uppercase;color:white;display:flex;align-items:center;gap:7px;}
+.card-body{padding:13px 15px;}
+
+/* ── FORM ── */
+.fgrp{margin-bottom:11px;}
+.flbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.45px;margin-bottom:4px;}
+.finp{width:100%;border:2px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;font-family:inherit;background:white;color:var(--text);transition:border-color .15s;}
+.finp:focus{outline:none;border-color:var(--accent);}
+select.finp{cursor:pointer;}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+/* ── CHECK ITEMS ── */
+.chk-grid{display:flex;flex-direction:column;gap:5px;}
+.chk-item{display:flex;align-items:center;gap:8px;padding:6px 9px;border-radius:7px;border:1px solid var(--border);cursor:pointer;font-size:12px;transition:all .15s;}
+.chk-item:hover{background:var(--lb);border-color:var(--accent);}
+.chk-item.on{background:var(--lb);border-color:var(--accent);}
+.chk-item input{width:14px;height:14px;accent-color:var(--accent);}
+
+/* ── BUTTONS ── */
+.btn-primary{width:100%;background:linear-gradient(135deg,var(--navy),var(--accent));color:white;border:none;border-radius:10px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:.4px;transition:opacity .15s;margin-top:4px;}
+.btn-primary:hover{opacity:.88;}
+.btn-sec{background:var(--light);color:var(--muted);border:2px solid var(--border);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;}
+.btn-sec:hover{border-color:var(--red);color:var(--red);}
+.btn-sm{border:none;border-radius:6px;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;}
+.btn-print{background:var(--navy);color:white;}
+.btn-copy{background:var(--teal);color:white;}
+.btn-export{background:var(--green);color:white;}
+
+/* ── INLINE ALERT ── */
+.ia{border-radius:8px;padding:7px 10px;font-size:11px;font-weight:600;margin-top:5px;display:none;line-height:1.5;}
+.ia.show{display:block;}
+.ia-warn{background:var(--ly);color:var(--gold);border-left:3px solid var(--gold);}
+.ia-bad{background:#FFE0E0;color:var(--red);border-left:3px solid var(--red);}
+.ia-good{background:var(--lg);color:var(--green);border-left:3px solid var(--green);}
+.ia-info{background:var(--lb);color:var(--blue);border-left:3px solid var(--accent);}
+
+/* ── TABS ── */
+.tab-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:13px;}
+.tbtn{padding:7px 14px;border-radius:20px;border:2px solid var(--border);background:white;font-size:11px;font-weight:700;cursor:pointer;color:var(--muted);transition:all .15s;white-space:nowrap;}
+.tbtn:hover{border-color:var(--accent);color:var(--accent);}
+.tbtn.on{background:var(--navy);border-color:var(--navy);color:white;}
+.tcon{display:none;}
+.tcon.on{display:block;}
+
+/* ── BANNER ── */
+.banner{border-radius:10px;padding:11px 15px;margin-bottom:13px;display:flex;align-items:flex-start;gap:10px;font-size:13px;}
+.b-ok{background:var(--lg);border:2px solid var(--green);color:var(--green);}
+.b-warn{background:var(--ly);border:2px solid var(--gold);color:var(--gold);}
+.b-bad{background:#FFE0E0;border:2px solid var(--red);color:var(--red);}
+.b-icon{font-size:20px;flex-shrink:0;}
+
+/* ── PRODUCT CARDS ── */
+.pc{border:2px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:11px;transition:box-shadow .15s;}
+.pc:hover{box-shadow:0 4px 18px rgba(0,0,0,.09);}
+.pc.ok{border-color:var(--green);}
+.pc.warn{border-color:var(--gold);}
+.pc.bad{border-color:var(--red);}
+.pc-hdr{padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.pc-hdr.ok{background:linear-gradient(90deg,#D6EFE3,white);}
+.pc-hdr.warn{background:linear-gradient(90deg,#FFF3CD,white);}
+.pc-hdr.bad{background:linear-gradient(90deg,#FFE0E0,white);}
+.pc-name{font-size:13px;font-weight:700;}
+.pc-policy{font-size:10px;color:var(--muted);}
+.pc-badge{margin-left:auto;padding:3px 9px;border-radius:10px;font-size:10px;font-weight:700;}
+.bg-ok{background:var(--green);color:white;}
+.bg-warn{background:var(--gold);color:white;}
+.bg-bad{background:var(--red);color:white;}
+.pc-body{background:#FAFBFC;padding:11px 14px;display:flex;gap:14px;flex-wrap:wrap;}
+.pc-col{flex:1;min-width:145px;}
+.pc-col-ttl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;}
+.pc-row{display:flex;gap:6px;font-size:11px;padding:3px 0;border-bottom:1px solid #F0F0F0;line-height:1.45;}
+.pc-row:last-child{border:none;}
+.pc-note{background:var(--ly);border-left:3px solid var(--gold);padding:6px 9px;border-radius:0 6px 6px 0;font-size:11px;color:var(--gold);margin-top:7px;line-height:1.5;}
+
+/* ── RIDER TABLE ── */
+.rtbl{width:100%;border-collapse:collapse;font-size:11px;}
+.rtbl th{background:var(--navy);color:white;padding:7px 10px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.4px;}
+.rtbl td{padding:7px 10px;border-bottom:1px solid #F0F4F8;vertical-align:top;line-height:1.5;}
+.rtbl tr:hover td{background:#F7FAFC;}
+.rtbl tr.requested td{background:#EBF8FF;}
+.av{display:inline-block;padding:2px 7px;border-radius:6px;font-size:10px;font-weight:700;}
+.av-y{background:var(--lg);color:var(--green);}
+.av-n{background:#FFE0E0;color:var(--red);}
+.av-w{background:var(--ly);color:var(--gold);}
+
+/* ── OCC TABLE ── */
+.otbl{width:100%;border-collapse:collapse;font-size:11px;border-radius:8px;overflow:hidden;border:1px solid var(--border);}
+.otbl th{background:var(--navy);color:white;padding:8px 10px;text-align:left;}
+.otbl td{padding:7px 10px;border-bottom:1px solid #F0F4F8;}
+.otbl tr:nth-child(even) td{background:#F7FAFC;}
+
+/* ── PREMIUM ESTIMATOR ── */
+.pest-box{background:var(--navy);color:#E8F4FD;border-radius:10px;padding:14px;}
+.pest-big{font-size:32px;font-weight:800;color:#48BB78;}
+.pest-sub{font-size:12px;opacity:.8;margin-top:2px;}
+.pest-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
+.pest-item{background:rgba(255,255,255,.1);border-radius:7px;padding:9px;text-align:center;}
+.pest-item-val{font-size:16px;font-weight:700;color:#FCD34D;}
+.pest-item-lbl{font-size:10px;opacity:.75;margin-top:2px;}
+
+/* ── MUG PLAN ── */
+.mug-box{display:flex;gap:0;border-radius:10px;overflow:hidden;border:2px solid var(--accent);}
+.mug-item{flex:1;text-align:center;padding:14px 10px;}
+.mug-item:not(:last-child){border-right:2px solid var(--accent);}
+.mug-icon{font-size:26px;margin-bottom:5px;}
+.mug-label{font-size:11px;font-weight:700;color:var(--navy);}
+.mug-val{font-size:13px;color:var(--muted);margin-top:3px;}
+.mug-plus{display:flex;align-items:center;font-size:22px;font-weight:700;color:var(--accent);padding:0 4px;}
+
+/* ── QUICK REF GRID ── */
+.qrg{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(max-width:600px){.qrg{grid-template-columns:1fr;}}
+.qr-box{background:#F7FAFC;border:1px solid var(--border);border-radius:8px;padding:10px;}
+.qr-ttl{font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.4px;margin-bottom:7px;}
+.qr-row{display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-bottom:1px solid #F0F4F8;}
+.qr-row:last-child{border:none;}
+.qr-k{color:var(--muted);}
+.qr-v{font-weight:700;color:var(--text);text-align:right;max-width:60%;}
+
+/* ── OCC SEARCH ── */
+.occ-search-wrap{position:relative;}
+.occ-dropdown{display:none;position:absolute;left:0;right:0;top:100%;z-index:999;background:white;border:2px solid var(--accent);border-top:none;border-radius:0 0 8px 8px;max-height:240px;overflow-y:auto;box-shadow:0 6px 20px rgba(0,0,0,.15);}
+.occ-dd-item{padding:8px 11px;cursor:pointer;font-size:12px;border-bottom:1px solid #F0F4F8;}
+.occ-dd-item:hover,.occ-dd-item.hi{background:var(--lb);}
+.occ-dd-item .oddi-name{font-weight:700;color:var(--accent);}
+.occ-dd-item .oddi-det{color:var(--muted);font-size:10px;margin-top:1px;}
+.cls-tag{display:inline-block;padding:1px 6px;border-radius:5px;font-size:10px;font-weight:700;margin-right:4px;}
+.cls5{background:#D6EFE3;color:var(--green);}
+.cls4{background:var(--lb);color:var(--blue);}
+.cls3{background:#F3E8FF;color:#5B2C8A;}
+.cls2{background:var(--lo);color:var(--orange);}
+.cls1{background:#FFE0E0;color:var(--red);}
+.clsNI{background:#E2E8F0;color:#4A5568;}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:44px 20px;color:var(--muted);}
+.empty-icon{font-size:52px;margin-bottom:12px;}
+
+/* ── CONTACT BAR ── */
+.cbar{background:var(--navy);color:white;padding:12px 22px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;font-size:12px;border-radius:12px;margin-top:18px;}
+.cbar strong{font-size:14px;}
+.cbar span{opacity:.85;}
+
+/* ── PRINT ── */
+@media print{
+  .header{position:static;}
+  .no-print{display:none!important;}
+  body{background:white;}
+  .card{box-shadow:none;border:1px solid #ccc;}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="im-logo">IM</div>
+  <div class="header-title">
+    <h1>Illinois Mutual — DI Qualifier &amp; Presenter</h1>
+    <p>Paycheck Power® Series · DI105 &amp; BE105 · Occupation Guide · Premium Estimator</p>
+  </div>
+  <div class="hdr-badges">
+    <span class="hdr-badge live">● Live Tool</span>
+    <span class="hdr-badge">Agent Use Only</span>
+    <span class="hdr-badge">Not For Client Distribution</span>
+  </div>
+</div>
+
+<div class="wrap">
+<div class="cols">
+
+<!-- ═══════ LEFT PANEL ═══════ -->
+<div class="no-print" id="leftPanel">
+
+  <!-- Client Info -->
+  <div class="card">
+    <div class="card-hdr" style="background:var(--navy);">👤 Client Information</div>
+    <div class="card-body">
+      <div class="fgrp">
+        <div class="flbl">Client Name</div>
+        <input id="cName" class="finp" placeholder="First Last" oninput="syncName()">
+      </div>
+      <div class="fg2">
+        <div class="fgrp">
+          <div class="flbl">Age (Last Birthday)</div>
+          <input id="cAge" type="number" class="finp" placeholder="e.g. 42" min="18" max="75" oninput="onAgeChange()">
+        </div>
+        <div class="fgrp">
+          <div class="flbl">Gender</div>
+          <select id="cGender" class="finp">
+            <option value="">Select…</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+        </div>
+      </div>
+      <div class="fgrp">
+        <div class="flbl">State of Residence</div>
+        <select id="cState" class="finp" onchange="onStateChange()">
+          <option value="">Select…</option>
+          <option value="AL">Alabama</option><option value="AZ">Arizona</option><option value="AR">Arkansas</option>
+          <option value="CO">Colorado</option><option value="CT">Connecticut</option><option value="DE">Delaware</option>
+          <option value="FL">Florida</option><option value="GA">Georgia</option><option value="ID">Idaho</option>
+          <option value="IL">Illinois</option><option value="IN">Indiana</option><option value="IA">Iowa</option>
+          <option value="KS">Kansas</option><option value="KY">Kentucky</option><option value="LA">Louisiana</option>
+          <option value="ME">Maine</option><option value="MD">Maryland</option><option value="MA">Massachusetts</option>
+          <option value="MI">Michigan</option><option value="MN">Minnesota</option><option value="MS">Mississippi</option>
+          <option value="MO">Missouri</option><option value="MT">Montana</option><option value="NE">Nebraska</option>
+          <option value="NV">Nevada</option><option value="NH">New Hampshire</option><option value="NJ">New Jersey</option>
+          <option value="NC">North Carolina</option><option value="ND">North Dakota</option><option value="OH">Ohio</option>
+          <option value="OK">Oklahoma</option><option value="OR">Oregon</option><option value="PA">Pennsylvania</option>
+          <option value="RI">Rhode Island</option><option value="SC">South Carolina</option><option value="SD">South Dakota</option>
+          <option value="TN">Tennessee</option><option value="TX">Texas</option><option value="UT">Utah</option>
+          <option value="VA">Virginia</option><option value="WA">Washington</option><option value="WV">West Virginia</option>
+          <option value="WI">Wisconsin</option><option value="WY">Wyoming</option>
+          <option value="AK">Alaska ❌</option><option value="CA">California ❌</option>
+          <option value="DC">DC ❌</option><option value="HI">Hawaii ❌</option>
+          <option value="NM">New Mexico ❌</option><option value="NY">New York ❌</option>
+          <option value="VT">Vermont ❌</option>
+        </select>
+        <div class="ia ia-bad" id="stateAlert"></div>
+      </div>
+      <div class="ia ia-warn" id="ageAlert" style="margin-top:4px;"></div>
+    </div>
+  </div>
+
+  <!-- Occupation Search -->
+  <div class="card">
+    <div class="card-hdr" style="background:var(--accent);">💼 Occupation Lookup</div>
+    <div class="card-body">
+      <div class="fgrp">
+        <div class="flbl">Search Occupation</div>
+        <div class="occ-search-wrap">
+          <input id="occSearch" class="finp" placeholder="Type job title (e.g. nurse, carpenter, attorney...)"
+            oninput="occDoSearch(this.value)" onkeydown="occKeyNav(event)" autocomplete="off">
+          <div id="occDropdown" class="occ-dropdown"></div>
+        </div>
+        <div class="ia ia-info show" id="occResult" style="margin-top:7px;display:none;"></div>
+      </div>
+      <div class="fgrp">
+        <div class="flbl">Occupation Class (confirm or override)</div>
+        <select id="occClass" class="finp">
+          <option value="">Auto from search above</option>
+          <option value="5">Class 5 — Admin / Professional / Clerical</option>
+          <option value="4">Class 4 — Specialized Technical (Dentist, Surgeon, CRNA)</option>
+          <option value="3">Class 3 — Semi-Pro / Technical / Supervisory</option>
+          <option value="2">Class 2 — Skilled Trade / Manual Labor</option>
+          <option value="1">Class 1 — Heavy Manual / Hazardous</option>
+          <option value="NI">NI — Not Insurable</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Coverage Needs -->
+  <div class="card">
+    <div class="card-hdr" style="background:var(--teal);">💰 Coverage Parameters</div>
+    <div class="card-body">
+      <div class="fgrp">
+        <div class="flbl">Monthly Earned Income</div>
+        <input id="cIncome" type="number" class="finp" placeholder="e.g. 5000" oninput="onIncomeChange()">
+        <div class="ia ia-info" id="incomeAlert"></div>
+      </div>
+      <div class="fgrp">
+        <div class="flbl">Desired Monthly Benefit</div>
+        <input id="cBenefit" type="number" class="finp" placeholder="$200 – $10,000">
+        <div class="ia ia-warn" id="benefitAlert"></div>
+      </div>
+      <div class="fg2">
+        <div class="fgrp">
+          <div class="flbl">Benefit Period</div>
+          <select id="cBP" class="finp">
+            <option value="">Select…</option>
+            <option value="6mo">6 Month</option>
+            <option value="1yr">1 Year</option>
+            <option value="2yr">2 Year</option>
+            <option value="5yr">5 Year</option>
+            <option value="10yr">10 Year</option>
+            <option value="67">To Age 67</option>
+          </select>
+        </div>
+        <div class="fgrp">
+          <div class="flbl">Elimination Period</div>
+          <select id="cElim" class="finp">
+            <option value="30">30 Days</option>
+            <option value="60">60 Days</option>
+            <option value="90">90 Days</option>
+            <option value="180">180 Days</option>
+            <option value="365">365 Days</option>
+            <option value="730">730 Days</option>
+          </select>
+        </div>
+      </div>
+      <div class="fgrp">
+        <div class="flbl">Policy Type Needed</div>
+        <select id="cType" class="finp">
+          <option value="personal">Personal DI only (DI105)</option>
+          <option value="both">Personal DI + Business Expense (DI105 + BE105)</option>
+          <option value="be">Business Expense only (BE105)</option>
+        </select>
+      </div>
+      <div class="fgrp">
+        <div class="flbl">Tobacco / Nicotine</div>
+        <select id="cTobacco" class="finp">
+          <option value="no">Non-tobacco</option>
+          <option value="yes">Current tobacco/nicotine user</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Riders -->
+  <div class="card">
+    <div class="card-hdr" style="background:var(--green);">⚙️ Optional Riders to Evaluate</div>
+    <div class="card-body">
+      <div class="chk-grid" id="riderGrid">
+        <label class="chk-item"><input type="checkbox" value="rop"> Return of Premium Rider</label>
+        <label class="chk-item"><input type="checkbox" value="cola"> COLA (Cost of Living Adjustment)</label>
+        <label class="chk-item"><input type="checkbox" value="adl"> ADL (Activities of Daily Living)</label>
+        <label class="chk-item"><input type="checkbox" value="gio"> Guaranteed Insurability Option</label>
+        <label class="chk-item"><input type="checkbox" value="noncan"> Non-Cancelable Policy Rider</label>
+        <label class="chk-item"><input type="checkbox" value="ownoc2yr"> 2-Year Pure Own Occupation</label>
+        <label class="chk-item"><input type="checkbox" value="ownoc5yr"> 5-Year Pure Own Occupation</label>
+        <label class="chk-item"><input type="checkbox" value="ownoc67"> To Age 67 Own Occ Extension</label>
+        <label class="chk-item"><input type="checkbox" value="residual"> Residual Disability Benefit</label>
+        <label class="chk-item"><input type="checkbox" value="integrated"> Integrated Monthly Benefit</label>
+        <label class="chk-item"><input type="checkbox" value="autoincr"> Automatic Increase Benefit</label>
+        <label class="chk-item"><input type="checkbox" value="retroinj"> Retroactive Injury Benefit</label>
+        <label class="chk-item"><input type="checkbox" value="fullmental"> Full Benefits — Mental/Nervous/Substance</label>
+        <label class="chk-item"><input type="checkbox" value="accident"> Add Accident Insurance (WSA07)</label>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-primary" onclick="runQual()">🔍 Run Illinois Mutual Qualifier</button>
+  <div style="display:flex;gap:8px;margin-top:9px;">
+    <button class="btn-sec" onclick="resetAll()" style="flex:1;">↺ Reset</button>
+    <button class="btn-sm btn-print no-print" onclick="window.print()" style="flex:1;padding:8px;">🖨 Print Results</button>
+    <button class="btn-sm btn-export no-print" onclick="exportSummary()" style="flex:1;padding:8px;">📥 Export</button>
+  </div>
+</div>
+
+<!-- ═══════ RIGHT PANEL ═══════ -->
+<div id="rightPanel">
+
+  <!-- Empty state -->
+  <div id="emptyState" class="card">
+    <div class="card-body empty">
+      <div class="empty-icon">🏛️</div>
+      <div style="font-size:17px;font-weight:700;color:var(--text);margin-bottom:9px;">Illinois Mutual DI Qualifier</div>
+      <div style="font-size:13px;color:var(--muted);max-width:400px;margin:0 auto;line-height:1.75;">Complete the form and click <strong>Run Qualifier</strong> to instantly see which Illinois Mutual DI and Business Expense policies fit your client — with full benefit period availability, rider analysis, premium estimates, and state-specific rules.</div>
+      <div style="margin-top:18px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+        <span style="background:var(--lb);border-radius:7px;padding:5px 12px;font-size:11px;color:var(--accent);font-weight:700;">📋 DI105 Personal</span>
+        <span style="background:var(--lb);border-radius:7px;padding:5px 12px;font-size:11px;color:var(--accent);font-weight:700;">🏢 BE105 Business</span>
+        <span style="background:var(--lb);border-radius:7px;padding:5px 12px;font-size:11px;color:var(--accent);font-weight:700;">💥 WSA07 Accident</span>
+        <span style="background:var(--lg);border-radius:7px;padding:5px 12px;font-size:11px;color:var(--green);font-weight:700;">💰 Premium Estimator</span>
+        <span style="background:var(--ly);border-radius:7px;padding:5px 12px;font-size:11px;color:var(--gold);font-weight:700;">⚙️ 13 Riders Analyzed</span>
+        <span style="background:var(--lb);border-radius:7px;padding:5px 12px;font-size:11px;color:var(--blue);font-weight:700;">🗺️ State Rules</span>
+        <span style="background:var(--lb);border-radius:7px;padding:5px 12px;font-size:11px;color:var(--blue);font-weight:700;">🏠 M.U.G.® Plan Script</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results (hidden until qualify) -->
+  <div id="resultWrap" style="display:none;">
+
+    <!-- Client Summary Header -->
+    <div id="clientSummaryBar" style="background:linear-gradient(135deg,var(--navy),var(--accent));color:white;border-radius:12px;padding:13px 17px;margin-bottom:13px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+      <div>
+        <div style="font-size:16px;font-weight:700;" id="summName">Client</div>
+        <div style="font-size:12px;opacity:.8;margin-top:2px;" id="summSub">Age — State — Class</div>
+      </div>
+      <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn-sm btn-print no-print" onclick="window.print()">🖨 Print</button>
+        <button class="btn-sm btn-copy no-print" onclick="copyClientSummary()">📋 Copy Summary</button>
+        <button class="btn-sm btn-export no-print" onclick="exportSummary()">📥 Export CSV</button>
+      </div>
+    </div>
+
+    <!-- Overall Banner -->
+    <div id="overallBanner"></div>
+    <!-- Issues list -->
+    <div id="issuesList" style="display:none;background:var(--ly);border:1px solid var(--gold);border-radius:9px;padding:10px 14px;margin-bottom:12px;font-size:12px;">
+      <strong style="color:var(--gold);">⚠️ Items to Review Before Submitting:</strong>
+      <ul id="issueUL" style="margin:6px 0 0 17px;color:var(--text);"></ul>
+    </div>
+
+    <div class="tab-bar no-print">
+      <button class="tbtn on" onclick="showTab('products',this)">📋 Products</button>
+      <button class="tbtn" onclick="showTab('premium',this)">💰 Premium Est.</button>
+      <button class="tbtn" onclick="showTab('riders',this)">⚙️ Riders</button>
+      <button class="tbtn" onclick="showTab('mug',this)">🏠 M.U.G.® Script</button>
+      <button class="tbtn" onclick="showTab('occguide',this)">💼 Occ Guide</button>
+      <button class="tbtn" onclick="showTab('staterules',this)">🗺️ State Rules</button>
+      <button class="tbtn" onclick="showTab('quickref',this)">📊 Quick Ref</button>
+      <button class="tbtn" onclick="showTab('agecheat',this)">🎂 Age Cutoffs</button>
+      <button class="tbtn" onclick="showTab('worksite',this)">🏢 Worksite Benefits</button>
+    </div>
+
+    <!-- TAB: Products -->
+    <div class="tcon on" id="tab-products">
+      <div id="productGrid"></div>
+    </div>
+
+    <!-- TAB: Premium Estimator -->
+    <div class="tcon" id="tab-premium">
+      <div class="card">
+        <div class="card-hdr" style="background:var(--navy);">💰 Premium Estimator — Paycheck Power® DI105</div>
+        <div class="card-body">
+          <div class="pest-box" id="premiumBox">
+            <div style="font-size:11px;opacity:.75;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Estimated Monthly Premium</div>
+            <div class="pest-big" id="premMain">—</div>
+            <div class="pest-sub" id="premSub">Fill in benefit amount and run qualifier</div>
+            <div class="pest-grid" id="premGrid"></div>
+          </div>
+          <div style="margin-top:12px;font-size:11px;color:var(--muted);line-height:1.7;">
+            <strong>⚠️ Important Disclaimer:</strong> These are rough illustrative estimates only. Actual premiums depend on occupation class, specific health history, state, tobacco status, and full underwriting. Always generate an official quote using <strong>5GQUOTE.com</strong> or the Illinois Mutual Agent Portal before presenting to a client.
+          </div>
+          <div style="margin-top:10px;background:var(--lb);border-radius:8px;padding:10px 12px;font-size:12px;">
+            <strong style="color:var(--accent);">📊 5G Quote Tool:</strong> <a href="https://www.5GQUOTE.com" target="_blank" style="color:var(--accent);">www.5GQUOTE.com</a> — Generate official quotes on any device, anytime.<br>
+            <strong style="color:var(--accent);">🖥 Agent Portal:</strong> <a href="https://Agent.IllinoisMutual.com" target="_blank" style="color:var(--accent);">Agent.IllinoisMutual.com</a> — Submit eApplications and access all tools.
+          </div>
+        </div>
+      </div>
+
+      <!-- ROP Value Illustration -->
+      <div class="card">
+        <div class="card-hdr" style="background:#2D6A4F;">📈 Return of Premium — Value Illustration</div>
+        <div class="card-body" id="ropIllustration">
+          <div style="font-size:13px;color:var(--muted);">Run qualifier with a benefit amount to see the ROP illustration.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Riders -->
+    <div class="tcon" id="tab-riders">
+      <div class="card">
+        <div class="card-hdr" style="background:var(--accent);">⚙️ Rider Eligibility Analysis</div>
+        <div class="card-body" style="padding:0;overflow-x:auto;">
+          <table class="rtbl" id="riderTable">
+            <tr><th>Rider</th><th>Policy Form</th><th>Classes</th><th>Ages</th><th>Eligible?</th><th>Notes / Restrictions</th></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: MUG Script -->
+    <div class="tcon" id="tab-mug">
+      <div class="card">
+        <div class="card-hdr" style="background:var(--navy);">🏠 The M.U.G.® Plan — Illinois Mutual Sales Concept</div>
+        <div class="card-body">
+          <div style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.7;">If your client experiences an income-interrupting disability due to illness or injury, how would they pay their most basic monthly expenses? M.U.G.® expenses generally MUST be paid — they can't be reduced or eliminated.</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;flex-wrap:wrap;">
+            <div class="mug-item" style="background:var(--lb);border-radius:10px;border:2px solid var(--accent);">
+              <div class="mug-icon">🏠</div>
+              <div class="mug-label">Mortgage</div>
+              <div class="mug-val" id="mugMort">—</div>
+            </div>
+            <div class="mug-plus">+</div>
+            <div class="mug-item" style="background:var(--lb);border-radius:10px;border:2px solid var(--accent);">
+              <div class="mug-icon">💡</div>
+              <div class="mug-label">Utilities</div>
+              <div class="mug-val" id="mugUtil">—</div>
+            </div>
+            <div class="mug-plus">+</div>
+            <div class="mug-item" style="background:var(--lb);border-radius:10px;border:2px solid var(--accent);">
+              <div class="mug-icon">🛒</div>
+              <div class="mug-label">Groceries</div>
+              <div class="mug-val" id="mugGroc">—</div>
+            </div>
+            <div class="mug-plus">=</div>
+            <div class="mug-item" style="background:var(--lg);border-radius:10px;border:2px solid var(--green);">
+              <div class="mug-icon">🛡️</div>
+              <div class="mug-label">M.U.G.® Plan</div>
+              <div class="mug-val" style="color:var(--green);font-weight:700;" id="mugTotal">DI Benefit</div>
+            </div>
+          </div>
+          <div id="mugScript"></div>
+        </div>
+      </div>
+      <!-- Job A vs Job B comparison -->
+      <div class="card">
+        <div class="card-hdr" style="background:var(--accent);">🎯 Job A vs Job B — The Value of DI</div>
+        <div class="card-body" id="jobABScript"></div>
+      </div>
+    </div>
+
+    <!-- TAB: Occ Guide -->
+    <div class="tcon" id="tab-occguide">
+      <div class="card">
+        <div class="card-hdr" style="background:var(--navy);">💼 Occupation Class Definitions</div>
+        <div class="card-body">
+          <table class="otbl">
+            <tr><th>Class</th><th>SIDI</th><th>Description</th><th>Common Examples</th></tr>
+            <tr><td><strong style="color:var(--green);">Class 5</strong></td><td style="font-weight:700;">A</td><td>Administrative, professional, managerial, clerical — no manual labor or service demands</td><td>Accountant, Attorney, Actuary, Computer Analyst, Secretary, Bookkeeper, Insurance Broker</td></tr>
+            <tr><td><strong style="color:var(--accent);">Class 4</strong></td><td style="font-weight:700;">B</td><td>Professional/specialized technical — physical dexterity, little or no manual labor. Max issue $8K/mo.</td><td>Surgeon, Dentist, CRNA, Oral Surgeon, Orthodontist, Endodontist, Cardiologist</td></tr>
+            <tr><td><strong style="color:#5B2C8A;">Class 3</strong></td><td style="font-weight:700;">B</td><td>Semi-professional, supervisory, or technical — on-site supervision, moderate dexterity</td><td>Dental Hygienist, Medical Technician, Physical Therapist, On-site Supervisor, RN (hospital)</td></tr>
+            <tr><td><strong style="color:var(--orange);">Class 2</strong></td><td style="font-weight:700;">C</td><td>Skilled trade — continual physical dexterity and manual labor/services, specialized training required</td><td>Carpenter, Electrician, Farmer, Mechanic, Plumber, Cosmetologist, LPN, Paramedic</td></tr>
+            <tr><td><strong style="color:var(--red);">Class 1</strong></td><td style="font-weight:700;">C</td><td>Heavy manual labor, hazardous exposure — basic skills, longer recuperation periods expected</td><td>Chiropractor, Factory Laborer, Firefighter, Police Officer, Roofer, Carpet Installer, Welder</td></tr>
+            <tr><td><strong>NI</strong></td><td style="font-weight:700;">NI</td><td>Not Insurable — severe hazard, extraordinary psychological stressors, extreme physical dexterity</td><td>Air Traffic Controller, Pilot, Longshoreman, Armed Forces (all branches), SWAT, Bomb Squad</td></tr>
+          </table>
+          <div style="margin-top:12px;font-size:11px;color:var(--muted);line-height:1.6;">
+            📌 <strong>Key Rule:</strong> Occupation class is determined by <em>actual duties performed</em>, not job title alone. Obtain percentage of time in professional/managerial duties vs. manual labor. Class 4 and Chiropractors: max $8,000/month issue, $10,000/month participation. The Underwriting Department has final approval authority.
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr" style="background:#4A5568;">📋 Benefit Period &amp; Rider Availability by Class</div>
+        <div class="card-body" style="overflow-x:auto;">
+          <table class="otbl">
+            <tr><th>Class</th><th>6 Mo</th><th>1 Yr</th><th>2 Yr</th><th>5 Yr</th><th>10 Yr</th><th>To Age 67</th><th>Non-Can</th><th>COLA</th><th>Own Occ 5-Yr</th><th>Own Occ 67</th></tr>
+            <tr><td><strong>5</strong></td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+            <tr><td><strong>4</strong></td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+            <tr><td><strong>3</strong></td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+            <tr><td><strong>2</strong></td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td></tr>
+            <tr><td><strong>1</strong></td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td></tr>
+          </table>
+          <div style="margin-top:7px;font-size:10px;color:var(--muted);">Ages 56–60: 5-Year and 10-Year NOT available regardless of class. Ages 61+: To Age 67 only. Class 1 max benefit period 5-Year.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: State Rules -->
+    <div class="tcon" id="tab-staterules">
+      <div id="stateRulesContent"></div>
+    </div>
+
+    <!-- TAB: Quick Reference -->
+    <div class="tcon" id="tab-quickref">
+      <div class="card">
+        <div class="card-hdr" style="background:var(--navy);">📊 Illinois Mutual DI — Quick Reference Guide</div>
+        <div class="card-body">
+          <div class="qrg">
+            <div class="qr-box">
+              <div class="qr-ttl">DI105 — Parameters</div>
+              <div class="qr-row"><span class="qr-k">Issue Ages</span><span class="qr-v">18–60 (67 plan: up to 60)</span></div>
+              <div class="qr-row"><span class="qr-k">Min Earned Income</span><span class="qr-v">$600/month</span></div>
+              <div class="qr-row"><span class="qr-k">Min Issue</span><span class="qr-v">$200/month</span></div>
+              <div class="qr-row"><span class="qr-k">Max Issue (most)</span><span class="qr-v">$10,000/month</span></div>
+              <div class="qr-row"><span class="qr-k">Max Issue (Class 4 / Chiro)</span><span class="qr-v">$8,000/month</span></div>
+              <div class="qr-row"><span class="qr-k">Max Participation</span><span class="qr-v">$12,000/month ($10K Class 4)</span></div>
+              <div class="qr-row"><span class="qr-k">Guaranteed Renewable</span><span class="qr-v">To age 67</span></div>
+              <div class="qr-row"><span class="qr-k">Conditionally Renewable</span><span class="qr-v">To age 75</span></div>
+              <div class="qr-row"><span class="qr-k">Coverage Hours</span><span class="qr-v">24/7 on & off job</span></div>
+            </div>
+            <div class="qr-box">
+              <div class="qr-ttl">BE105 — Business Expense</div>
+              <div class="qr-row"><span class="qr-k">Issue Ages</span><span class="qr-v">18–60 only</span></div>
+              <div class="qr-row"><span class="qr-k">Benefit Periods</span><span class="qr-v">12 / 18 / 24 months</span></div>
+              <div class="qr-row"><span class="qr-k">Elim Periods</span><span class="qr-v">30 / 60 / 90 days</span></div>
+              <div class="qr-row"><span class="qr-k">Max Issue</span><span class="qr-v">100% of eligible expenses, max $10K</span></div>
+              <div class="qr-row"><span class="qr-k">Biz Existence Min</span><span class="qr-v">1 year (or 3 yrs same occ)</span></div>
+              <div class="qr-row"><span class="qr-k">Premium Tax Deduct.</span><span class="qr-v">Generally yes — consult tax advisor</span></div>
+              <div class="qr-row"><span class="qr-k">Eligible Expenses</span><span class="qr-v">Rent, utilities, employee salaries*, payroll taxes, insurance</span></div>
+              <div class="qr-row"><span class="qr-k">Conversion</span><span class="qr-v">To DI policy before age 60</span></div>
+            </div>
+            <div class="qr-box">
+              <div class="qr-ttl">Total Disability Definition</div>
+              <div class="qr-row"><span class="qr-k">First 24 months</span><span class="qr-v">Own occ AND not working elsewhere</span></div>
+              <div class="qr-row"><span class="qr-k">After 24 months</span><span class="qr-v">Any occupation (by education/training)</span></div>
+              <div class="qr-row"><span class="qr-k">With 2-Yr Pure Own Occ</span><span class="qr-v">Own occ only for 24 months (not working req removed)</span></div>
+              <div class="qr-row"><span class="qr-k">With 5-Yr Pure Own Occ</span><span class="qr-v">Own occ only for 60 months</span></div>
+              <div class="qr-row"><span class="qr-k">With To-67 Own Occ Ext</span><span class="qr-v">Own occ to age 67</span></div>
+              <div class="qr-row"><span class="qr-k">LA / UT</span><span class="qr-v">Differs — see policy</span></div>
+              <div class="qr-row"><span class="qr-k">FL Applicants</span><span class="qr-v">Must purchase own occ rider</span></div>
+            </div>
+            <div class="qr-box">
+              <div class="qr-ttl">Key Policy Provisions</div>
+              <div class="qr-row"><span class="qr-k">Survivor Benefit</span><span class="qr-v">4× monthly (3× MD) — 6 months continuous TD</span></div>
+              <div class="qr-row"><span class="qr-k">Retroactive WOP</span><span class="qr-v">90-day TD → waive premiums + refund 3 months</span></div>
+              <div class="qr-row"><span class="qr-k">Partial Disability</span><span class="qr-v">Up to 6 months per period</span></div>
+              <div class="qr-row"><span class="qr-k">Recurrent Disability</span><span class="qr-v">Same cause = continuation (unless 6 mo. gap)</span></div>
+              <div class="qr-row"><span class="qr-k">Presumed TD</span><span class="qr-v">Loss of both eyes/hands/feet/speech/hearing</span></div>
+              <div class="qr-row"><span class="qr-k">Organ Donor</span><span class="qr-v">No elim period (not ID); policy must be in force 6 mo</span></div>
+              <div class="qr-row"><span class="qr-k">Foreign Travel</span><span class="qr-v">Max 90-day benefit outside US/Canada/Mexico</span></div>
+              <div class="qr-row"><span class="qr-k">Unemployment Suspend</span><span class="qr-v">After 1 yr in force — once per 24-month period</span></div>
+            </div>
+            <div class="qr-box">
+              <div class="qr-ttl">Pre-Existing Conditions</div>
+              <div class="qr-row"><span class="qr-k">Standard</span><span class="qr-v">2-year lookback</span></div>
+              <div class="qr-row"><span class="qr-k">MN, MT, NC, ND, VA</span><span class="qr-v">1-year lookback</span></div>
+              <div class="qr-row"><span class="qr-k">NH</span><span class="qr-v">9-month lookback</span></div>
+              <div class="qr-row"><span class="qr-k">Applies To</span><span class="qr-v">Conditions diagnosed/treated within lookback; symptoms that would prompt prudent person to seek care</span></div>
+            </div>
+            <div class="qr-box">
+              <div class="qr-ttl">WSA07 Accident Insurance</div>
+              <div class="qr-row"><span class="qr-k">Issue Ages</span><span class="qr-v">18–69 primary/spouse; 0–21 child</span></div>
+              <div class="qr-row"><span class="qr-k">Benefit Levels</span><span class="qr-v">Economy / Standard / Preferred / Premium</span></div>
+              <div class="qr-row"><span class="qr-k">Coverage</span><span class="qr-v">24-hr accidents; guaranteed renewable for life</span></div>
+              <div class="qr-row"><span class="qr-k">Can issue if DI declined</span><span class="qr-v">Yes (if non-medical UW met)</span></div>
+              <div class="qr-row"><span class="qr-k">Catastrophic Rider</span><span class="qr-v">$100K insured / $50K spouse & child; 180-day elim</span></div>
+              <div class="qr-row"><span class="qr-k">Wellness Rider</span><span class="qr-v">$50–$200 per year for screening tests</span></div>
+              <div class="qr-row"><span class="qr-k">Not available</span><span class="qr-v">CT, NH (with DI105)</span></div>
+            </div>
+          </div>
+          <div style="margin-top:12px;background:var(--lb);border-left:4px solid var(--navy);padding:10px 13px;border-radius:0 8px 8px 0;font-size:12px;line-height:1.7;">
+            <strong style="color:var(--navy);">📞 Illinois Mutual Contacts:</strong><br>
+            DI Sales: (800) 437-7355, Option 2 · DI Underwriting: ext. 790 · Email: Sales@IllinoisMutual.com<br>
+            Quote Tool: <a href="https://www.5GQUOTE.com" target="_blank" style="color:var(--accent);">www.5GQUOTE.com</a> · Agent Portal: <a href="https://Agent.IllinoisMutual.com" target="_blank" style="color:var(--accent);">Agent.IllinoisMutual.com</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Age Cutoffs (NEW — added reference) -->
+    <div class="tcon" id="tab-agecheat">
+      <div class="banner b-warn" style="margin-bottom:13px;">
+        <div class="b-icon">🎂</div>
+        <div><strong>Is 55 the cutoff to buy this insurance? Short answer: no.</strong> Age 55 is not a hard stop for DI105 or BE105. It matters for one specific rider (GIO). See the breakdown below.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-hdr" style="background:var(--navy);">🎂 Base Policy Issue Ages</div>
+        <div class="card-body" style="overflow-x:auto;">
+          <table class="otbl">
+            <tr><th>Product</th><th>Issue Ages</th><th>Notes</th></tr>
+            <tr><td><strong>Personal Paycheck Power® (DI105)</strong></td><td>18–60<br><span style="color:var(--muted);font-size:10px;">(To Age 67 plan: up to 60)</span></td><td>Guaranteed Renewable to age 67; Conditionally Renewable to age 75. No hard cutoff at 55 — but benefit period choices shrink (see below).</td></tr>
+            <tr><td><strong>Business Expense Power® (BE105)</strong></td><td>18–60</td><td>Not available past age 60. Conversion to a DI policy allowed before age 60.</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hdr" style="background:var(--accent);">📆 Benefit Period Availability by Age (DI105)</div>
+        <div class="card-body" style="overflow-x:auto;">
+          <table class="otbl">
+            <tr><th>Age at Application</th><th>Benefit Periods Available</th></tr>
+            <tr><td><strong>18–55</strong></td><td>All periods: 6-Month, 1-Year, 2-Year, 5-Year, 10-Year, To Age 67</td></tr>
+            <tr><td><strong>56–60</strong></td><td>6-Month, 1-Year, 2-Year, To Age 67 only — <strong style="color:var(--red);">5-Year and 10-Year NOT available</strong></td></tr>
+            <tr><td><strong>61–67</strong></td><td>To Age 67 only — subject to underwriter discretion</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hdr" style="background:var(--green);">⚙️ Key Rider Age Cutoffs</div>
+        <div class="card-body" style="overflow-x:auto;">
+          <table class="otbl">
+            <tr><th>Rider</th><th>Age Cutoff</th><th>Notes</th></tr>
+            <tr><td><strong>Guaranteed Insurability Option (GIO)</strong></td><td style="font-weight:700;color:var(--red);">Before age 55</td><td>Allows future coverage increases without new health evidence. Confirm exact version/cutoff with underwriting — some GIO versions extend the purchase window to age 60.</td></tr>
+            <tr><td><strong>Return of Premium (ROP)</strong></td><td style="font-weight:700;">18–55 to add at issue</td><td>Refunds premium (less claims paid), typically around ages 65–67. Not available in every state — verify (e.g. CT, MA).</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hdr" style="background:var(--gold);">💡 Bottom Line for Qualifying Prospects</div>
+        <div class="card-body" style="font-size:13px;line-height:1.75;">
+          Age 55 is <strong>not</strong> a hard stop for selling DI105 or BE105 — you can still write coverage for clients well into their late 50s. Age 55 matters specifically for locking in the <strong>GIO rider</strong>, and benefit-period choices shrink starting at age 56. Age 60 is the hard cutoff for <strong>BE105</strong> and for adding <strong>GIO</strong> in most versions.
+          <div style="margin-top:10px;background:var(--lb);border-left:4px solid var(--navy);padding:10px 13px;border-radius:0 8px 8px 0;font-size:12px;">
+            For exact issue-age charts by state and occupation class, confirm with Illinois Mutual DI Underwriting: <strong>(800) 437-7355, Option 2</strong> or <strong>Sales@IllinoisMutual.com</strong>. Terms of the actual policy control over this reference.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Worksite Voluntary Benefits (NEW — added reference) -->
+    <div class="tcon" id="tab-worksite">
+      <div class="banner b-ok" style="margin-bottom:13px;">
+        <div class="b-icon">🏢</div>
+        <div><strong>Worksite Voluntary Benefits</strong> — a separate product line from DI105/BE105, sold through an employer at no direct cost to the employer. Products: Term Life, Accident, Critical Illness, Individual Short Term Disability, and Group Short Term Disability.</div>
+      </div>
+
+      <!-- Employer & Employee Eligibility -->
+      <div class="card">
+        <div class="card-hdr" style="background:var(--navy);">📋 Employer &amp; Group Eligibility</div>
+        <div class="card-body">
+          <div class="qrg">
+            <div class="qr-box">
+              <div class="qr-ttl">Employer Eligibility</div>
+              <div class="qr-row"><span class="qr-k">Group tenure</span><span class="qr-v">In existence 1 year (Group STD: 6+ months)</span></div>
+              <div class="qr-row"><span class="qr-k">Seasonal groups</span><span class="qr-v">Not eligible (not applicable in MI)</span></div>
+              <div class="qr-row"><span class="qr-k">Uninsurable occ. concentration</span><span class="qr-v">Must be under 25% (not applicable in MI)</span></div>
+              <div class="qr-row"><span class="qr-k">Gov't-financed groups</span><span class="qr-v">Not eligible if heavily financed/dependent on gov't contracts</span></div>
+              <div class="qr-row"><span class="qr-k">Sovereign nation owned</span><span class="qr-v">Not eligible</span></div>
+              <div class="qr-row"><span class="qr-k">Commissioned sales</span><span class="qr-v">Must be under 50% of group (not applicable in MI; unless Home Office approved)</span></div>
+              <div class="qr-row"><span class="qr-k">Related by blood/marriage</span><span class="qr-v">Must be under 50% of group (unless Home Office approved)</span></div>
+              <div class="qr-row"><span class="qr-k">Union / H&amp;W fund</span><span class="qr-v">Not eligible (unless Home Office approved)</span></div>
+            </div>
+            <div class="qr-box">
+              <div class="qr-ttl">Employee Eligibility &amp; Case Size</div>
+              <div class="qr-row"><span class="qr-k">Actively at Work</span><span class="qr-v">Required at application; min. 20 hrs/wk full-time*</span></div>
+              <div class="qr-row"><span class="qr-k">Seasonal/temp employees</span><span class="qr-v">Not eligible</span></div>
+              <div class="qr-row"><span class="qr-k">On leave / health-restricted</span><span class="qr-v">Not considered Actively at Work</span></div>
+              <div class="qr-row"><span class="qr-k">1099 contract workers</span><span class="qr-v">Need 6+ months continuous service (where included)</span></div>
+              <div class="qr-row"><span class="qr-k">Minimum case size</span><span class="qr-v">3 eligible employee lives</span></div>
+              <div class="qr-row"><span class="qr-k">Guaranteed Issue (post-enroll)</span><span class="qr-v">10+ eligible lives may qualify</span></div>
+              <div class="qr-row"><span class="qr-k">Guaranteed Issue (pre-enroll)</span><span class="qr-v">100+ eligible lives may qualify</span></div>
+              <div class="qr-row"><span class="qr-k">Group STD case size</span><span class="qr-v">3+ eligible employees, 2+ lives issued</span></div>
+            </div>
+          </div>
+          <div style="margin-top:10px;font-size:10px;color:var(--muted);line-height:1.6;">
+            *Actively at Work minimum hours may vary by Industry Classification and product. For Group STD specifically, Actively at Work means performing all duties at least 30 hrs/wk (17.5 hrs/wk in VT). Employer eligibility list is not all-inclusive — Illinois Mutual reserves the right to reject any business/industry that doesn't meet underwriting criteria.
+          </div>
+          <div class="pc-note" style="margin-top:10px;">
+            💡 All Worksite products except Group Short Term Disability are <strong>portable</strong> — employees keep coverage if they change employers. Payroll deduction or EFT available (Group STD: payroll deduction only).
+          </div>
+        </div>
+      </div>
+
+      <!-- Group STD -->
+      <div class="pc ok">
+        <div class="pc-hdr ok">
+          <div><div class="pc-name">Group Short Term Disability Insurance</div><div class="pc-policy">Policy Form VSTD11</div></div>
+          <span class="pc-badge bg-ok">Off-the-Job Only</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-col" style="min-width:200px;">
+            <div class="pc-col-ttl">Description</div>
+            <div style="font-size:11px;line-height:1.6;">Off-job short term disability employees purchase through their employer. No evidence of insurability required if enrolled during initial eligibility period while Actively at Work.</div>
+            <div class="pc-note">Not available in CA, CO, CT, DE, FL, MA, MD, MT, NH, NJ, NM, OR, RI, SD or WA.</div>
+          </div>
+          <div class="pc-col">
+            <div class="pc-col-ttl">Eligibility &amp; Benefit Periods</div>
+            <div class="pc-row"><span>✅</span><span>Employees ages 18–65</span></div>
+            <div class="pc-row"><span>❌</span><span>Spouses and children not eligible</span></div>
+            <div class="pc-row"><span>❌</span><span>Not available for 1099 contract workers</span></div>
+            <div class="pc-row"><span>✅</span><span>Benefit periods: 13 or 26 weeks (not all available in every state)</span></div>
+          </div>
+          <div class="pc-col">
+            <div class="pc-col-ttl">Benefit Amounts &amp; Features</div>
+            <div class="pc-row"><span>✅</span><span>66 2/3% of Basic Weekly Earnings, max $600/week</span></div>
+            <div class="pc-row"><span>✅</span><span>$10,000 AD&amp;D benefit per insured employee</span></div>
+            <div class="pc-row"><span>✅</span><span>Waiver of Premium after 90 consecutive days of Total Disability</span></div>
+            <div class="pc-row"><span>⚠️</span><span>Benefit reduced by other in-force income benefits employee receives/is eligible for</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Individual STD -->
+      <div class="pc ok">
+        <div class="pc-hdr ok">
+          <div><div class="pc-name">Individual Short Term Disability Insurance</div><div class="pc-policy">Policy Form WSD07 (WD13 in GA, MD, SC)</div></div>
+          <span class="pc-badge bg-ok">24-Hr or Off-the-Job</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-col" style="min-width:200px;">
+            <div class="pc-col-ttl">Description</div>
+            <div style="font-size:11px;line-height:1.6;">At no direct cost to the employer, employees purchase individual coverage based on their own budget/needs. Employee-paid premiums generally mean tax-free benefits.</div>
+            <div class="pc-note">Not available in AK, CA, DC, HI, MT, NH, NJ, NM, NY or VT.</div>
+          </div>
+          <div class="pc-col">
+            <div class="pc-col-ttl">Eligibility &amp; Benefit Periods</div>
+            <div class="pc-row"><span>✅</span><span>Employees ages 17–64</span></div>
+            <div class="pc-row"><span>❌</span><span>Spouses and children not eligible</span></div>
+            <div class="pc-row"><span>✅</span><span>Employer chooses 24-hour or Off-the-Job Only</span></div>
+            <div class="pc-row"><span>✅</span><span>Benefit periods: 3 to 60 months (multiple options possible; waiting periods apply)</span></div>
+          </div>
+          <div class="pc-col">
+            <div class="pc-col-ttl">Benefit Amounts &amp; Renewability</div>
+            <div class="pc-row"><span>✅</span><span>$400–$5,000/month in $100 increments</span></div>
+            <div class="pc-row"><span>⚠️</span><span>Cannot exceed 60% of gross salary (40% for 1099 contract workers)</span></div>
+            <div class="pc-row"><span>✅</span><span>Guaranteed Renewable to age 72</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Term Life -->
+      <div class="pc ok">
+        <div class="pc-hdr ok">
+          <div><div class="pc-name">Term Life Insurance</div><div class="pc-policy">Policy Form LT17</div></div>
+          <span class="pc-badge bg-ok">Portable · Not Convertible</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-col" style="min-width:200px;">
+            <div class="pc-col-ttl">Description</div>
+            <div style="font-size:11px;line-height:1.6;">Level premiums for the initial term (10-yr, 20-yr, or To Age 65); renewable after at annually increasing rates until age 95.</div>
+            <div class="pc-note">Not available in AK, DC, HI, MT or NY.</div>
+          </div>
+          <div class="pc-col">
+            <div class="pc-col-ttl">Issue Ages by Term</div>
+            <div class="pc-row"><span>✅</span><span>10-Year Term: ages 18–70</span></div>
+            <div class="pc-row"><span>✅</span><span>20-Year Term: ages 18–60</span></div>
+            <div class="pc-row"><span>✅</span><span>To Age 65 Term: ages 18–55</span></div>
+            <div class="pc-row"><span>✅</span><span>Spouse/children eligible via optional riders</span></div>
+          </div>
+          <div class="pc-col">
+            <div class="pc-col-ttl">Benefit Amounts &amp; Riders</div>
+            <div class="pc-row"><span>✅</span><span>Employee: Min $25,000 / Max $150,000</span></div>
+            <div class="pc-row"><span>✅</span><span>Spouse: Min $25,000 / Max lesser of $150,000 or employee amount</span></div>
+            <div class="pc-row"><span>✅</span><span>Child: Min $5,000 / Max $10,000</span></div>
+            <div class="pc-row"><span>✅</span><span>Included: Terminal Illness Accelerated Death Benefit Rider</span></div>
+            <div class="pc-row"><span>✅</span><span>Optional: Other Insured Term, Accidental Death Benefit, Child Term, Disability Waiver of Premium</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Accident -->
+      <div class="pc ok">
+        <div class="pc-hdr ok">
+          <div><div class="pc-name">Accident Insurance</div><div class="pc-policy">Policy Form WSA07</div></div>
+          <span class="pc-badge bg-ok">24-Hr or Off-the-Job</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-col" style="min-width:200px;">
+            <div class="pc-col-ttl">Description</div>
+            <div style="font-size:11px;line-height:1.6;">Fixed monetary benefit for a covered accidental bodily injury, paid directly to the insured for any use. Does not cover sickness or meet ACA Minimum Essential Coverage.</div>
+            <div class="pc-note">Not available in AK, CT, DC, HI, NH, NM or NY.</div>
+          </div>
+          <div class="pc-col">
+            <div class="pc-col-ttl">Eligibility &amp; Levels</div>
+            <div class="pc-row"><span>✅</span><span>Employees &amp; spouses ages 18–69</span></div>
+            <div class="pc-row"><span>⚠️</span><span>Dependent child age requirements vary by state</span></div>
+            <div class="pc-row"><span>✅</span><span>Employer chooses 24-hour or Off-the-Job Only</span></div>
+            <div class="pc-row"><span>✅</span><span>Benefit levels: Economy, Standard, Preferred, Premium</span></div>
+          </div>
+          <div class="pc-col">
+            <div class="pc-col-ttl">Optional Riders</div>
+            <div class="pc-row"><span>✅</span><span>Off Job Accident Disability Rider (employee only) — not in CA, CO, DE, MA, MD, MT, NJ, OR, PA, RI, SD, VT, WA</span></div>
+            <div class="pc-row"><span>✅</span><span>Sickness Hospital Confinement Rider — not guaranteed issue; not in CO, IN, KS, MA, ME, MI, NJ, TN, UT, VA, VT, WA, WI</span></div>
+            <div class="pc-row"><span>✅</span><span>Wellness Benefit Rider — one policy only if paired with Critical Illness; not in CA, GA, MA, MI, NJ, UT, VA, WA</span></div>
+            <div class="pc-row"><span>✅</span><span>Catastrophic Accident Rider — unavailable if Critical Illness purchased; not in ID, MA, NE, PA, TN, UT</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Critical Illness -->
+      <div class="pc ok">
+        <div class="pc-hdr ok">
+          <div><div class="pc-name">Critical Illness Insurance</div><div class="pc-policy">Policy Form WC14</div></div>
+          <span class="pc-badge bg-ok">Guaranteed Renewable to 72</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-col" style="min-width:200px;">
+            <div class="pc-col-ttl">Description</div>
+            <div style="font-size:11px;line-height:1.6;">Lump sum payment on diagnosis of a covered critical illness, usable for any purpose. Limited benefit policy — does not replace major medical or meet ACA Minimum Essential Coverage.</div>
+            <div class="pc-note">Not available in AZ, CA, CT, GA, MA, MN, MT, NH, NJ, NM, UT or VA.</div>
+          </div>
+          <div class="pc-col">
+            <div class="pc-col-ttl">Eligibility &amp; Options</div>
+            <div class="pc-row"><span>✅</span><span>Employees &amp; spouses ages 18–69</span></div>
+            <div class="pc-row"><span>⚠️</span><span>Dependent child rules vary by state; coverage terminates at age 26</span></div>
+            <div class="pc-row"><span>✅</span><span>Employer chooses Base Plan Only or Base Plan Plus Cancer</span></div>
+          </div>
+          <div class="pc-col">
+            <div class="pc-col-ttl">Benefit Amounts &amp; Riders</div>
+            <div class="pc-row"><span>✅</span><span>Employee: $5,000–$50,000</span></div>
+            <div class="pc-row"><span>✅</span><span>Spouse: 50% of employee amount</span></div>
+            <div class="pc-row"><span>✅</span><span>Dependent child: 25% of employee amount</span></div>
+            <div class="pc-row"><span>✅</span><span>Optional: Cancer Critical Illness Rider (not ME/WY), Recurrence Benefit Rider, Cancer One Recurrence Rider, Wellness Benefit Rider (not CO/MI/WA)</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:6px;background:var(--lb);border-left:4px solid var(--navy);padding:10px 13px;border-radius:0 8px 8px 0;font-size:12px;line-height:1.7;">
+        <strong style="color:var(--navy);">📞 Worksite Sales Team:</strong> (800) 437-7355, Option 2 · Worksite@IllinoisMutual.com · <a href="https://www.IllinoisMutual.com/Worksite" target="_blank" style="color:var(--accent);">www.IllinoisMutual.com/Worksite</a><br>
+        Register at <a href="https://Agent.IllinoisMutual.com" target="_blank" style="color:var(--accent);">Agent.IllinoisMutual.com</a> for the Enrollment Tool (EasyAppsOnline®), Secure Employer Portal, and sales tools (Worksite Insurance Agent Guide A8019, Worksite Agent Tips Flyer A8153).<br>
+        <span style="color:var(--muted);font-size:10px;">Worksite product line not available in AK, DC, HI or NY overall; individual product state exclusions above may be broader. Coverage and availability may vary — terms of the policy control.</span>
+      </div>
+    </div>
+
+  </div><!-- /resultWrap -->
+</div><!-- /right -->
+</div><!-- /cols -->
+
+<div class="cbar no-print">
+  <strong>Illinois Mutual Life Insurance Company</strong>
+  <span>📞 DI Sales: (800) 437-7355 Opt 2</span>
+  <span>🔬 UW: ext. 790</span>
+  <span>✉️ Sales@IllinoisMutual.com</span>
+  <span>🌐 5GQUOTE.com</span>
+  <span style="margin-left:auto;opacity:.65;font-size:10px;">A9642 · Agent Use Only · Products not available in AK, CA, DC, HI, NM, NY, VT</span>
+</div>
+</div><!-- /wrap -->
+
+<script>
+// ─── OCC DATABASE ─────────────────────────────────────────────
+const OCCS = [
+  // Medical
+  {n:'Accountant / CPA',c:'5',s:'A',cat:'Finance'},{n:'Actuary',c:'5',s:'A',cat:'Finance'},{n:'Acupuncturist',c:'3',s:'B',cat:'Medical'},{n:'Attorney / Lawyer',c:'5',s:'A',cat:'Legal'},{n:'Auditor',c:'5',s:'A',cat:'Finance'},{n:'Administrator (medical/dental/office)',c:'5',s:'A',cat:'Medical'},{n:'Anesthesiologist (MD)',c:'4',s:'B',cat:'Medical'},{n:'CRNA / Anesthetist',c:'4',s:'B',cat:'Medical'},{n:'Audiologist',c:'5',s:'A',cat:'Medical'},
+  {n:'Barber',c:'2',s:'C',cat:'Service'},{n:'Bookkeeper',c:'5',s:'A',cat:'Finance'},{n:'Biochemist (office)',c:'5',s:'A',cat:'Science'},{n:'Biochemist (lab)',c:'3',s:'B',cat:'Science'},
+  {n:'Cardiologist',c:'4',s:'B',cat:'Medical'},{n:'Carpenter',c:'2',s:'C',cat:'Construction'},{n:'Cashier (retail)',c:'3',s:'B',cat:'Retail'},{n:'Chiropractor',c:'1',s:'C',cat:'Medical',note:'Max $8,000/mo issue. 6-Mo and 1-Yr benefit periods only.'},{n:'Civil Engineer (field)',c:'3',s:'B',cat:'Construction'},{n:'Civil Engineer (office)',c:'5',s:'A',cat:'Construction'},{n:'Clergy / Minister / Pastor',c:'5',s:'A',cat:'Other'},{n:'CNA (Certified Nursing Asst.)',c:'1',s:'C',cat:'Medical'},{n:'Computer Analyst / Programmer',c:'5',s:'A',cat:'Technology'},{n:'Cosmetologist / Hair Stylist',c:'2',s:'C',cat:'Service'},{n:'Correctional Officer / Guard',c:'1',s:'C',cat:'Law'},{n:'Counselor / Social Worker (field)',c:'3',s:'B',cat:'Social'},{n:'Counselor / Social Worker (office)',c:'5',s:'A',cat:'Social'},
+  {n:'Dental Hygienist / Assistant',c:'3',s:'B',cat:'Dental'},{n:'Dentist',c:'4',s:'B',cat:'Dental'},{n:'Dermatologist',c:'5',s:'A',cat:'Medical'},{n:'Dietician (office only)',c:'5',s:'A',cat:'Medical'},{n:'Dispatcher',c:'3',s:'B',cat:'Transport'},{n:'Draftsman',c:'5',s:'A',cat:'Construction'},{n:'Drywall Installer',c:'2',s:'C',cat:'Construction'},
+  {n:'Electrician',c:'2',s:'C',cat:'Construction'},{n:'Elevator Mechanic (residential)',c:'2',s:'C',cat:'Construction'},{n:'EMT / Paramedic',c:'2',s:'C',cat:'Medical'},{n:'Endodontist',c:'4',s:'B',cat:'Dental'},{n:'Event Planner',c:'5',s:'A',cat:'Other'},
+  {n:'Factory Laborer',c:'1',s:'C',cat:'Factory'},{n:'Factory Foreman',c:'3',s:'B',cat:'Factory'},{n:'Factory Admin / Manager',c:'5',s:'A',cat:'Factory'},{n:'Farmer / Farm Laborer',c:'2',s:'C',cat:'Agriculture'},{n:'FBI / DEA / ATF Agent',c:'1',s:'C',cat:'Law'},{n:'Financial Advisor / Consultant',c:'5',s:'A',cat:'Finance'},{n:'Firefighter',c:'1',s:'C',cat:'Law'},{n:'Fitness Instructor / Personal Trainer',c:'2',s:'C',cat:'Service'},
+  {n:'Gastroenterologist',c:'4',s:'B',cat:'Medical'},{n:'Graphic Designer',c:'5',s:'A',cat:'Creative'},{n:'Gynecologist / OB-GYN',c:'4',s:'B',cat:'Medical'},
+  {n:'HVAC Technician',c:'2',s:'C',cat:'Construction'},{n:'Hospitalist',c:'5',s:'A',cat:'Medical'},
+  {n:'Insurance Agent / Broker',c:'5',s:'A',cat:'Finance'},
+  {n:'Janitor / Custodian',c:'1',s:'C',cat:'Service'},{n:'Judge',c:'5',s:'A',cat:'Legal'},
+  {n:'Landscape / Gardener',c:'2',s:'C',cat:'Agriculture'},{n:'LPN (Licensed Practical Nurse)',c:'2',s:'C',cat:'Medical'},{n:'Locksmith',c:'3',s:'B',cat:'Service'},
+  {n:'Mail Carrier',c:'2',s:'C',cat:'Transport'},{n:'Medical Technician',c:'3',s:'B',cat:'Medical'},{n:'Mechanic (auto)',c:'2',s:'C',cat:'Auto'},{n:'Midwife',c:'3',s:'B',cat:'Medical'},
+  {n:'Neurologist',c:'4',s:'B',cat:'Medical'},{n:'Nurse Practitioner',c:'5',s:'A',cat:'Medical'},
+  {n:'Obstetrician',c:'4',s:'B',cat:'Medical'},{n:'Oncologist',c:'5',s:'A',cat:'Medical'},{n:'Optometrist / Ophthalmologist',c:'5',s:'A',cat:'Medical'},{n:'Oral Surgeon',c:'4',s:'B',cat:'Dental'},{n:'Orthodontist',c:'4',s:'B',cat:'Dental'},{n:'Osteopath',c:'5',s:'A',cat:'Medical'},{n:'Occupational Therapist',c:'3',s:'B',cat:'Medical'},
+  {n:'Paralegal',c:'5',s:'A',cat:'Legal'},{n:'Pathologist',c:'5',s:'A',cat:'Medical'},{n:'Pediatrician',c:'5',s:'A',cat:'Medical'},{n:'Pharmacist',c:'5',s:'A',cat:'Medical'},{n:'Pharmacy Technician',c:'3',s:'B',cat:'Medical'},{n:'Physical Therapist',c:'3',s:'B',cat:'Medical'},{n:'Physician (GP / Family / Internal)',c:'5',s:'A',cat:'Medical'},{n:'Physician\'s Assistant (PA)',c:'5',s:'A',cat:'Medical'},{n:'Plumber',c:'2',s:'C',cat:'Construction'},{n:'Podiatrist',c:'4',s:'B',cat:'Medical'},{n:'Police Officer / Deputy / Sheriff',c:'1',s:'C',cat:'Law'},{n:'Police Supervisor (office only)',c:'3',s:'B',cat:'Law'},{n:'Police Dispatcher',c:'3',s:'B',cat:'Law'},{n:'Process Server',c:'1',s:'C',cat:'Legal'},{n:'Psychiatrist',c:'5',s:'A',cat:'Medical'},{n:'Psychologist',c:'5',s:'A',cat:'Medical'},{n:'Purchasing Agent',c:'5',s:'A',cat:'Business'},
+  {n:'Radiologist',c:'5',s:'A',cat:'Medical'},{n:'Real Estate Agent / Realtor',c:'5',s:'A',cat:'Finance'},{n:'Receptionist / Secretary',c:'5',s:'A',cat:'Clerical'},{n:'Respiratory Therapist',c:'3',s:'B',cat:'Medical'},{n:'RN (Doctor\'s Office / Clinic)',c:'5',s:'A',cat:'Medical'},{n:'RN (Hospital / Other)',c:'3',s:'B',cat:'Medical'},{n:'Roofer',c:'1',s:'C',cat:'Construction',note:'Class 1. 6-Mo, 1-Yr, 2-Yr, 5-Yr benefit periods.'},
+  {n:'School Teacher (classroom)',c:'5',s:'A',cat:'Education'},{n:'School Principal / Superintendent',c:'5',s:'A',cat:'Education'},{n:'Security Guard (unarmed)',c:'2',s:'C',cat:'Security'},{n:'Security Guard (armed)',c:'1',s:'C',cat:'Security'},{n:'Software Developer / Web Developer',c:'5',s:'A',cat:'Technology'},{n:'Speech Therapist',c:'5',s:'A',cat:'Medical'},{n:'Structural Iron Worker',c:'1',s:'C',cat:'Construction'},{n:'Surgeon',c:'4',s:'B',cat:'Medical'},{n:'Surveyor',c:'3',s:'B',cat:'Construction'},
+  {n:'Taxi / Uber / Lyft Driver',c:'1',s:'C',cat:'Transport',note:'Class 1. 6-Mo and 1-Yr benefit periods only.'},{n:'University Professor',c:'5',s:'A',cat:'Education'},
+  {n:'Urologist',c:'4',s:'B',cat:'Medical'},{n:'Veterinarian (small animal, DVM)',c:'5',s:'A',cat:'Medical'},{n:'Veterinarian (large animal, DVM)',c:'3',s:'B',cat:'Medical'},
+  {n:'Warehouse / Shipping Clerk',c:'2',s:'C',cat:'Factory'},{n:'Welder',c:'1',s:'C',cat:'Construction',note:'Class 1. 6-Mo, 1-Yr, 2-Yr benefit periods only.'},
+  {n:'X-Ray Technician / Ultrasound Tech',c:'3',s:'B',cat:'Medical'},
+  // NI
+  {n:'Air Traffic Controller',c:'NI',s:'NI',cat:'Aviation',note:'Not Insurable.'},{n:'Pilot / Flight Attendant / Crew Member',c:'NI',s:'NI',cat:'Aviation',note:'Not Insurable.'},{n:'Armed Forces — All Branches',c:'NI',s:'NI',cat:'Military',note:'Not Insurable.'},{n:'Day Trader (own account)',c:'NI',s:'NI',cat:'Finance',note:'Not Insurable.'},{n:'Longshoreman',c:'NI',s:'NI',cat:'Transport',note:'Not Insurable.'},{n:'SWAT / Bomb Squad / Riot Squad',c:'NI',s:'NI',cat:'Law',note:'Not Insurable.'},{n:'Secret Service',c:'NI',s:'NI',cat:'Law',note:'Not Insurable.'},{n:'UPS Driver',c:'NI',s:'NI',cat:'Transport',note:'Not Insurable — UPS specifically.'},{n:'Elected Official (political)',c:'NI',s:'NI',cat:'Government',note:'Not Insurable.'},{n:'Door-to-Door Canvassing Sales',c:'NI',s:'NI',cat:'Sales',note:'Not Insurable.'},
+];
+
+const UNAVAIL = ['AK','CA','DC','HI','NM','NY','VT'];
+const ELIM_MIN = {CO:60,CT:60,DE:60,KS:60,SD:60,MD:90,MA:90,NJ:90,OR:90,RI:90,WA:90};
+const NO730 = ['AR','CT','IA','ID','KS','MD','ME','NJ','OK','PA','SC','TX','UT','VA','WA','WV'];
+const NO365_90MAX_1YR = ['AR','CT','IA','ID','KS','ME','OK','PA','SC','TX','UT','VA','WA','WV'];
+const NO180MAX_2YR = ['AR','CT','IA','ID','KS','ME','OK','PA','SC','VA','WA','WV'];
+
+// ─── OCC SEARCH ───────────────────────────────────────────────
+let occResults = [], occIdx = -1, selectedOcc = null;
+
+function occDoSearch(q){
+  const dd = document.getElementById('occDropdown');
+  if(!q || q.length < 2){ dd.style.display='none'; return; }
+  const ql = q.toLowerCase();
+  occResults = OCCS.filter(o=>o.n.toLowerCase().includes(ql)||o.cat.toLowerCase().includes(ql)).slice(0,12);
+  if(!occResults.length){ dd.style.display='none'; return; }
+  dd.innerHTML = occResults.map((o,i)=>{
+    const clsTag = `<span class="cls-tag cls${o.c}">${o.c==='NI'?'NI':'Class '+o.c}</span>`;
+    return `<div class="occ-dd-item" data-idx="${i}" onclick="selectOcc(${i})">${clsTag}<span class="oddi-name">${o.n}</span><div class="oddi-det">${o.cat}${o.s?' · SIDI '+o.s:''}</div></div>`;
+  }).join('');
+  dd.style.display='block';
+  occIdx=-1;
+}
+
+function occKeyNav(e){
+  const items = document.querySelectorAll('.occ-dd-item');
+  if(e.key==='ArrowDown'){occIdx=Math.min(occIdx+1,items.length-1);}
+  else if(e.key==='ArrowUp'){occIdx=Math.max(occIdx-1,0);}
+  else if(e.key==='Enter'&&occIdx>=0){selectOcc(occIdx);return;}
+  else if(e.key==='Escape'){document.getElementById('occDropdown').style.display='none';return;}
+  items.forEach((el,i)=>el.classList.toggle('hi',i===occIdx));
+}
+
+function selectOcc(i){
+  selectedOcc = occResults[i];
+  document.getElementById('occSearch').value = selectedOcc.n;
+  document.getElementById('occDropdown').style.display='none';
+  document.getElementById('occClass').value = selectedOcc.c;
+  const el = document.getElementById('occResult');
+  const cls5colors={'5':'var(--green)','4':'var(--blue)','3':'#5B2C8A','2':'var(--orange)','1':'var(--red)','NI':'#4A5568'};
+  const clr = cls5colors[selectedOcc.c]||'var(--muted)';
+  const bgMap={'5':'var(--lg)','4':'var(--lb)','3':'#EDE0F8','2':'var(--lo)','1':'#FFE0E0','NI':'#E2E8F0'};
+  el.style.cssText=`display:block;background:${bgMap[selectedOcc.c]||'#eee'};border-left:3px solid ${clr};padding:7px 10px;border-radius:0 7px 7px 0;font-size:11px;font-weight:600;color:${clr};line-height:1.5;`;
+  el.textContent=`${selectedOcc.c==='NI'?'❌ NOT INSURABLE':'✓ Class '+selectedOcc.c+' (SIDI '+selectedOcc.s+')'} — ${selectedOcc.cat}${selectedOcc.note?' | ⚠️ '+selectedOcc.note:''}`;
+}
+
+document.addEventListener('click',e=>{if(!e.target.closest('.occ-search-wrap'))document.getElementById('occDropdown').style.display='none';});
+
+// ─── FIELD EVENTS ─────────────────────────────────────────────
+function onAgeChange(){
+  const age=parseInt(document.getElementById('cAge').value)||0;
+  const el=document.getElementById('ageAlert');
+  if(!age){el.className='ia';return;}
+  if(age<18){show(el,'ia ia-bad show','❌ Below minimum issue age of 18');}
+  else if(age<=55){show(el,'ia ia-good show','✅ Ages 18–55: All benefit periods and riders available');}
+  else if(age<=60){show(el,'ia ia-warn show','⚠️ Ages 56–60: 5-Year and 10-Year NOT available. Some riders limited.');}
+  else if(age<=67){show(el,'ia ia-warn show','⚠️ Ages 61–67: To Age 67 plan only. Very limited rider availability.');}
+  else{show(el,'ia ia-bad show','❌ Above maximum issue age');}
+}
+
+function onStateChange(){
+  const st=document.getElementById('cState').value;
+  const el=document.getElementById('stateAlert');
+  if(UNAVAIL.includes(st)){show(el,'ia ia-bad show',`❌ Illinois Mutual does NOT sell DI in ${st}. Products unavailable.`);}
+  else{el.className='ia';}
+}
+
+function onIncomeChange(){
+  const inc=parseFloat(document.getElementById('cIncome').value)||0;
+  const el=document.getElementById('incomeAlert');
+  if(!inc){el.className='ia';return;}
+  if(inc<600){show(el,'ia ia-bad show','❌ Below $600/month minimum earned income');}
+  else{
+    const pct=inc<=4000?0.70:inc<=8000?0.65:0.60;
+    const max=Math.min(Math.round(inc*pct/100)*100,10000);
+    show(el,'ia ia-info show',`💡 Estimated max benefit ≈ $${max.toLocaleString()}/mo (~${Math.round(pct*100)}% income). Use 5GQUOTE.com for official amount.`);
+  }
+}
+
+function show(el,cls,txt){el.className=cls;el.textContent=txt;}
+function syncName(){
+  const n=document.getElementById('cName').value;
+  if(document.getElementById('summName'))document.getElementById('summName').textContent=n||'Client';
+}
+
+function showTab(id,btn){
+  document.querySelectorAll('.tcon').forEach(el=>el.classList.remove('on'));
+  document.querySelectorAll('.tbtn').forEach(el=>el.classList.remove('on'));
+  document.getElementById('tab-'+id).classList.add('on');
+  btn.classList.add('on');
+  if(id==='staterules') buildStateRules();
+}
+
+// ─── STYLE CHECKBOXES ─────────────────────────────────────────
+document.querySelectorAll('.chk-item').forEach(item=>{
+  item.querySelector('input').addEventListener('change',function(){item.classList.toggle('on',this.checked);});
+});
+
+// ─── MAIN QUALIFIER ───────────────────────────────────────────
+function runQual(){
+  const age=parseInt(document.getElementById('cAge').value)||0;
+  const state=document.getElementById('cState').value;
+  const cls=document.getElementById('occClass').value||'5';
+  const income=parseFloat(document.getElementById('cIncome').value)||0;
+  const benefit=parseFloat(document.getElementById('cBenefit').value)||0;
+  const bp=document.getElementById('cBP').value;
+  const elim=parseInt(document.getElementById('cElim').value)||30;
+  const polType=document.getElementById('cType').value;
+  const tobacco=document.getElementById('cTobacco').value;
+  const name=document.getElementById('cName').value||'Client';
+  const gender=document.getElementById('cGender').value||'male';
+  const checked=[...document.querySelectorAll('#riderGrid input:checked')].map(e=>e.value);
+
+  document.getElementById('emptyState').style.display='none';
+  document.getElementById('resultWrap').style.display='block';
+  document.getElementById('summName').textContent=name;
+  document.getElementById('summSub').textContent=`Age ${age||'?'} · ${state||'State?'} · Class ${cls} · ${tobacco==='yes'?'Tobacco':'Non-Tobacco'}`;
+
+  const issues=[];
+  let overall='ok';
+
+  if(UNAVAIL.includes(state)){overall='bad';issues.push(`DI NOT available in ${state}`);}
+  if(age<18||age>67){overall='bad';issues.push('Age outside issue limits (18–67)');}
+  if(cls==='NI'){overall='bad';issues.push('Occupation classified as Not Insurable (NI)');}
+  if(income>0&&income<600){overall='bad';issues.push('Earned income below $600/month minimum');}
+  const maxIss=(cls==='4'||selectedOcc?.n?.toLowerCase().includes('chiropr'))?8000:10000;
+  if(benefit>maxIss){overall='warn';issues.push(`Desired benefit $${benefit.toLocaleString()} exceeds Class ${cls} max issue of $${maxIss.toLocaleString()}`);}
+  if(benefit>0&&benefit<200){overall='warn';issues.push('Benefit below $200/month minimum');}
+  const minElim=ELIM_MIN[state]||30;
+  if(elim<minElim){overall='warn';issues.push(`${state} requires minimum ${minElim}-day elimination period`);}
+  if(elim>=730&&NO730.includes(state)){overall='warn';issues.push(`730-day elimination period not available in ${state}`);}
+  if(age>55&&(bp==='5yr'||bp==='10yr')){overall='warn';issues.push('5-Year and 10-Year benefit periods NOT available for ages 56+');}
+  if(age>60&&bp!=='67'&&bp!==''){overall='warn';issues.push('Ages 61–67: Only To Age 67 benefit period available');}
+  if(cls==='1'&&(bp==='10yr'||bp==='67')){overall='warn';issues.push('Class 1: 10-Year and To Age 67 benefit periods NOT available');}
+
+  // Banners
+  const bannerMsg = overall==='bad'
+    ? `<div class="banner b-bad"><div class="b-icon">❌</div><div><strong>${name} does not qualify</strong> for Illinois Mutual DI based on current inputs. Review the flagged items and contact Underwriting if needed.</div></div>`
+    : overall==='warn'
+    ? `<div class="banner b-warn"><div class="b-icon">⚠️</div><div><strong>${name} may qualify</strong> — review the items below before submitting. Contact DI Underwriting at (800) 437-7355 ext. 790.</div></div>`
+    : `<div class="banner b-ok"><div class="b-icon">✅</div><div><strong>${name} appears to qualify</strong> for Illinois Mutual DI coverage. Review available products and riders below.</div></div>`;
+
+  document.getElementById('overallBanner').innerHTML=bannerMsg;
+
+  const issEl=document.getElementById('issuesList');
+  const issUL=document.getElementById('issueUL');
+  if(issues.length){
+    issEl.style.display='block';
+    issUL.innerHTML=issues.map(i=>`<li style="margin-bottom:3px;">${i}</li>`).join('');
+  } else issEl.style.display='none';
+
+  // ─ PRODUCTS ─
+  const prods=[];
+
+  const di105ok=cls!=='NI'&&age>=18&&age<=67&&!UNAVAIL.includes(state)&&(income===0||income>=600);
+  const bps=getBPs(cls,age);
+  prods.push({
+    id:'di105',name:'Personal Paycheck Power®',policy:'DI105',
+    st:di105ok?(issues.length?'warn':'ok'):'bad',
+    desc:'Individual disability income policy — pays monthly benefit when client is Totally Disabled. Guaranteed Renewable to age 67, Conditionally Renewable to age 75.',
+    cols:[
+      {ttl:'Eligibility & Parameters',rows:[
+        {i:cls!=='NI'?'✅':'❌',t:`Occupation Class ${cls} — ${occDesc(cls)}`},
+        {i:age>=18&&age<=67?'✅':'❌',t:`Age ${age||'?'} — Issue ages 18–67`},
+        {i:'✅',t:`Coverage 24/7 — on & off the job`},
+        {i:'✅',t:`Min $200/mo · Max $${maxIss.toLocaleString()}/mo`},
+        {i:tobacco==='yes'?'⚠️':'✅',t:tobacco==='yes'?'Tobacco user rates apply':'Non-tobacco rates apply'},
+      ]},
+      {ttl:'Available Benefit Periods',rows:bps.map(p=>({i:'✅',t:p}))},
+      {ttl:'Key Included Features',rows:[
+        {i:'✅',t:'Partial Disability benefit — up to 6 months'},
+        {i:'✅',t:'Retroactive Waiver of Premium after 90 days TD'},
+        {i:'✅',t:'Survivor Benefit — 4× monthly (3× in MD)'},
+        {i:'✅',t:'Presumed Total Disability benefit'},
+        {i:'✅',t:'Recurrent Disability — same-cause continuation'},
+        {i:'✅',t:'Organ Donor Benefit (not ID)'},
+        {i:'✅',t:'Retraining & Home Modification Benefit (6-mo TD)'},
+      ]},
+    ],
+    note: age>55&&age<=60?'⚠️ Ages 56–60: 5-Year and 10-Year benefit periods NOT available.':
+          age>60?'⚠️ Ages 61+: Only To Age 67 benefit period available. Underwriter discretion required.':
+          cls==='1'?'⚠️ Class 1: Max benefit period is 5-Year. 10-Year and To Age 67 NOT available.':
+          cls==='4'?'⚠️ Class 4 (and Chiropractors): Max issue $8,000/month. Max participation $10,000/month.':''
+  });
+
+  if(polType!=='personal'){
+    const be105ok=cls!=='NI'&&age>=18&&age<=60&&!UNAVAIL.includes(state);
+    prods.push({
+      id:'be105',name:'Business Expense Power®',policy:'BE105',
+      st:be105ok&&overall!=='bad'?'ok':age>60?'bad':'warn',
+      desc:'Reimburses eligible fixed business overhead expenses during Total Disability. Premiums generally tax-deductible as a business expense.',
+      cols:[
+        {ttl:'Eligibility',rows:[
+          {i:age<=60?'✅':'❌',t:age>60?`Age ${age} exceeds 60 — NOT available for BE105`:'Age within 18–60 issue limits'},
+          {i:'✅',t:'Benefit periods: 12, 18, or 24 months'},
+          {i:'✅',t:'Elimination periods: 30, 60, or 90 days'},
+          {i:'✅',t:'Business must exist 1+ year (or 3 yrs same occ)'},
+          {i:'✅',t:'Insured must be full-time active owner/manager'},
+        ]},
+        {ttl:'Eligible Business Expenses',rows:[
+          {i:'✅',t:'Rent / lease payments'},
+          {i:'✅',t:'Utilities, maintenance, insurance'},
+          {i:'✅',t:'Employee salaries (not insured or replacement)'},
+          {i:'✅',t:'Equipment rental, billing fees, postage'},
+          {i:'✅',t:'Professional dues, license fees, payroll taxes'},
+          {i:'✅',t:'Depreciation, mortgage/loan interest'},
+        ]},
+        {ttl:'Additional Features',rows:[
+          {i:'✅',t:'No offset with Social Security or workers comp'},
+          {i:'✅',t:'Partial Disability Monthly Business Expense benefit'},
+          {i:'✅',t:'Conversion to DI policy before age 60'},
+          {i:'✅',t:'Retroactive Waiver of Premium (90-day TD)'},
+          {i:'⚠️',t:'Disability benefits = business income (offset by covered expenses)'},
+        ]},
+      ],
+      note:'BE105 covers business overhead ONLY — not personal income. Home-operated businesses eligible, but home expenses excluded.'
+    });
+  }
+
+  if(checked.includes('accident')){
+    const accOk=!['CT','NH'].includes(state);
+    prods.push({
+      id:'wsa07',name:'Individual Accident Insurance',policy:'WSA07',
+      st:accOk?'ok':'bad',
+      desc:'Lump-sum cash benefit for accidental bodily injury. Guaranteed renewable for life. Available with DI application.',
+      cols:[
+        {ttl:'Coverage Details',rows:[
+          {i:accOk?'✅':'❌',t:!accOk?`WSA07 NOT available with DI105 in ${state}`:'Available — issue with DI105 application'},
+          {i:'✅',t:'Ages 18–69 primary/spouse; 0–21 (or 23, student) child'},
+          {i:'✅',t:'24-hour on & off job accident coverage'},
+          {i:'✅',t:'Guaranteed renewable for life'},
+          {i:'✅',t:'Can issue even if DI declined (if non-medical UW met)'},
+        ]},
+        {ttl:'Available Options & Riders',rows:[
+          {i:'✅',t:'Benefit Levels: Economy, Standard, Preferred, Premium'},
+          {i:'✅',t:'Catastrophic Accident Rider (9245): $100K insured / $50K spouse & child'},
+          {i:'✅',t:'Wellness Benefit Rider (9243): $50–$200/yr for health screens'},
+          {i:'⚠️',t:'Catastrophic Rider NOT available in: ID, MA, NE, PA, TN, UT'},
+          {i:'⚠️',t:'Wellness Rider NOT available in: GA, MA, MI, NJ, UT, VA, WA'},
+        ]},
+      ],
+      note:'Accident Insurance does NOT cover sickness, does NOT replace major medical or Medicare supplement, and does NOT meet ACA Minimum Essential Coverage requirements.'
+    });
+  }
+
+  let pgHTML='';
+  prods.forEach(p=>{
+    const bdgTxt=p.st==='ok'?'✓ Eligible':p.st==='warn'?'⚠️ Review':'✗ Not Eligible';
+    const bdgCls=p.st==='ok'?'bg-ok':p.st==='warn'?'bg-warn':'bg-bad';
+    pgHTML+=`<div class="pc ${p.st}">
+      <div class="pc-hdr ${p.st}">
+        <div><div class="pc-name">${p.name}</div><div class="pc-policy">Policy Form ${p.policy}</div></div>
+        <span class="pc-badge ${bdgCls}">${bdgTxt}</span>
+      </div>
+      <div class="pc-body">
+        <div class="pc-col" style="min-width:200px;">
+          <div class="pc-col-ttl">Description</div>
+          <div style="font-size:11px;line-height:1.6;margin-bottom:8px;">${p.desc}</div>
+          ${p.note?`<div class="pc-note">${p.note}</div>`:''}
+        </div>
+        ${p.cols.map(col=>`
+          <div class="pc-col">
+            <div class="pc-col-ttl">${col.ttl}</div>
+            ${col.rows.map(r=>`<div class="pc-row"><span style="flex-shrink:0">${r.i}</span><span>${r.t}</span></div>`).join('')}
+          </div>`).join('')}
+      </div>
+    </div>`;
+  });
+  document.getElementById('productGrid').innerHTML=pgHTML;
+
+  // ─ PREMIUM ─
+  buildPremium(benefit, age, cls, elim, bp, tobacco, gender, checked);
+
+  // ─ RIDERS ─
+  buildRiders(cls, age, state, checked, elim, bp);
+
+  // ─ MUG ─
+  buildMUG(name, income, benefit);
+}
+
+function getBPs(cls,age){
+  const all=['6 Month','1 Year','2 Year','5 Year','10 Year','To Age 67'];
+  if(cls==='NI') return ['None — Not Insurable'];
+  if(age>60) return ['To Age 67'];
+  if(age>55) return ['6 Month','1 Year','2 Year','To Age 67'];
+  if(cls==='1') return ['6 Month','1 Year','2 Year','5 Year'];
+  return all;
+}
+
+function occDesc(cls){
+  return {5:'Admin/Professional/Clerical',4:'Specialized Technical',3:'Semi-Pro/Supervisory/Technical',2:'Skilled Trade/Manual Labor',1:'Heavy Manual/Hazardous','NI':'Not Insurable — cannot issue'}[cls]||'Unknown';
+}
+
+// ─ PREMIUM ESTIMATOR ─
+function buildPremium(benefit, age, cls, elim, bp, tobacco, gender, checked){
+  if(!benefit||!age||!cls||cls==='NI'){
+    document.getElementById('premMain').textContent='—';
+    document.getElementById('premSub').textContent='Enter benefit amount, age, and occupation class';
+    document.getElementById('premGrid').innerHTML='';
+    return;
+  }
+
+  // Base rates per $100/month benefit (very rough approximations for illustration ONLY)
+  const baseRates={
+    5:{male:{30:2.8,40:4.2,50:6.8,60:11.2},female:{30:3.8,40:5.6,50:9.0,60:14.5}},
+    4:{male:{30:3.2,40:4.9,50:8.0,60:13.0},female:{30:4.2,40:6.4,50:10.5,60:16.0}},
+    3:{male:{30:3.6,40:5.5,50:9.0,60:14.5},female:{30:4.8,40:7.2,50:11.5,60:18.0}},
+    2:{male:{30:4.5,40:6.8,50:11.0,60:17.0},female:{30:5.8,40:8.8,50:13.5,60:21.0}},
+    1:{male:{30:5.5,40:8.5,50:13.5,60:20.0},female:{30:7.0,40:10.5,50:16.0,60:24.0}},
+  };
+  const bpMult={'6mo':0.42,'1yr':0.62,'2yr':0.78,'5yr':0.90,'10yr':0.96,'67':1.0};
+  const elimMult={30:1.0,60:0.88,90:0.78,180:0.62,365:0.46,730:0.35};
+  const tobMult=tobacco==='yes'?1.32:1.0;
+
+  const numCls=parseInt(cls)||5;
+  const rates=baseRates[numCls]||baseRates[5];
+  const gRates=rates[gender]||rates['male'];
+  const ageKeys=[30,40,50,60];
+  const closestAge=ageKeys.reduce((a,b)=>Math.abs(b-age)<Math.abs(a-age)?b:a);
+  const baseRatePerHundred=gRates[closestAge]||gRates[40];
+  const bpM=bpMult[bp]||1.0;
+  const elimM=elimMult[elim]||1.0;
+  const monthly=(benefit/100)*baseRatePerHundred*bpM*elimM*tobMult;
+
+  document.getElementById('premMain').textContent='~$'+Math.round(monthly).toLocaleString()+'/mo';
+  document.getElementById('premSub').textContent=`Estimated · Class ${cls} · Age ${age} · ${gender} · ${bp||'no BP'} · ${elim}-day elim · ${tobacco==='yes'?'Tobacco':'Non-Tobacco'}`;
+
+  const annual=monthly*12;
+  const yearsPaying=Math.max(0,65-age);
+  const totalPaid=annual*yearsPaying;
+
+  document.getElementById('premGrid').innerHTML=`
+    <div class="pest-item"><div class="pest-item-val">~$${Math.round(annual*12).toLocaleString()}</div><div class="pest-item-lbl">Annual Premium</div></div>
+    <div class="pest-item"><div class="pest-item-val">~$${Math.round(monthly*benefit/100*3).toLocaleString()}</div><div class="pest-item-lbl">Daily Cost</div></div>
+    <div class="pest-item"><div class="pest-item-val">$${benefit.toLocaleString()}/mo</div><div class="pest-item-lbl">Monthly Benefit</div></div>
+    <div class="pest-item"><div class="pest-item-val">~$${Math.round(totalPaid).toLocaleString()}</div><div class="pest-item-lbl">Total Est. Premiums (to age 65)</div></div>
+  `;
+
+  // ROP illustration
+  if(checked.includes('rop')&&age<=55){
+    const ropPctCost=elim<=30?0.20:elim<=60?0.25:0.30;
+    const ropMonthly=monthly*ropPctCost;
+    const totalWithRop=(monthly+ropMonthly)*12*yearsPaying;
+    document.getElementById('ropIllustration').innerHTML=`
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center;">
+        <div style="background:var(--lb);border-radius:8px;padding:12px;border:2px solid var(--accent);">
+          <div style="font-size:20px;font-weight:800;color:var(--accent);">~$${Math.round(ropMonthly)}/mo</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px;">Estimated ROP Rider Cost</div>
+        </div>
+        <div style="background:var(--lg);border-radius:8px;padding:12px;border:2px solid var(--green);">
+          <div style="font-size:20px;font-weight:800;color:var(--green);">~$${Math.round(totalWithRop).toLocaleString()}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px;">Total Est. Premiums Paid (to age 65)</div>
+        </div>
+        <div style="background:var(--lg);border-radius:8px;padding:12px;border:2px solid var(--green);">
+          <div style="font-size:20px;font-weight:800;color:var(--green);">100%</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px;">Returned at age 65–67 (less benefits)</div>
+        </div>
+      </div>
+      <div style="margin-top:10px;font-size:12px;color:var(--muted);line-height:1.7;">
+        <strong>📊 The ROP Sales Script:</strong> "If you never make a claim, you get ALL your money back at age 65. If you DO make a claim, the policy paid exactly what it was supposed to. You literally cannot lose."
+      </div>`;
+  } else {
+    document.getElementById('ropIllustration').innerHTML=`<div style="font-size:12px;color:var(--muted);">Check the <strong>Return of Premium Rider</strong> in the riders section and re-run to see the ROP illustration. (Ages 18–55, not available in CT or MA.)</div>`;
+  }
+}
+
+// ─ RIDERS ─
+const RIDER_DATA=[
+  {id:'rop',name:'Return of Premium',policy:'9266',classes:'5,4,3,2,1',ages:'18–55',
+   check:(cls,age,st,elim,bp)=>age<=55&&!['CT','MA'].includes(st)&&![365,730].includes(parseInt(elim)),
+   notes:'Returns 100% premiums less benefits at ages 65–67. Partial return before 65. Not available with 365- or 730-day elim. Not in CT or MA.'},
+  {id:'cola',name:'COLA (Cost of Living Adjustment)',policy:'9260',classes:'5,4,3,2',ages:'18–60',
+   check:(cls,age,st,elim,bp)=>['5','4','3','2'].includes(cls)&&age<=60&&['5yr','10yr','67'].includes(bp),
+   notes:'Increases base benefit in 2nd year of TD by CPI. Available with 5-Year, 10-Year, To Age 67 benefit periods only.'},
+  {id:'adl',name:'ADL (Activities of Daily Living)',policy:'9259',classes:'5,4,3,2,1',ages:'18–60',
+   check:(cls,age,st,elim,bp)=>st!=='CT'&&age<=60&&['2yr','5yr','67'].includes(bp),
+   notes:'Additional benefit if insured cannot perform 2+ ADLs or is cognitively impaired. Not in CT. ADL benefit ≤ 2× base benefit. ADL period cannot exceed base period.'},
+  {id:'gio',name:'Guaranteed Insurability Option (GIO)',policy:'9267',classes:'5,4,3,2,1',ages:'18–45',
+   check:(cls,age,st)=>age<=45,
+   notes:'5 purchase options before age 55. Each purchase ≥24 months apart or qualifying life event. Options: $100–$600. Cannot exceed TD monthly benefit. NOTE: confirm current version — some GIO versions extend purchase eligibility to age 60.'},
+  {id:'noncan',name:'Non-Cancelable Policy Rider',policy:'9251',classes:'5,4,3',ages:'18–60',
+   check:(cls,age,st)=>['5','4','3'].includes(cls)&&age<=60,
+   notes:'Adds Non-Cancelable (Guaranteed Premium) feature. Classes 5, 4, and 3 only.'},
+  {id:'ownoc2yr',name:'2-Year Pure Own Occupation',policy:'9255',classes:'5,4,3,2,1',ages:'18–60',
+   check:(cls,age,st)=>cls!=='NI'&&age<=60&&!['LA','UT'].includes(st),
+   notes:'Own occ definition for first 24 months (removes "not working elsewhere" requirement). Not in LA or UT. FL applicants MUST purchase this or the 5-Yr version.'},
+  {id:'ownoc5yr',name:'5-Year Pure Own Occupation',policy:'9256',classes:'5,4,3',ages:'18–60',
+   check:(cls,age,st)=>['5','4','3'].includes(cls)&&age<=60&&!['LA','UT'].includes(st),
+   notes:'Own occ for 60 months. Classes 5/4/3 only. Not in LA or UT. Must also purchase 5-Yr Occ Extension (9257) or To-67 Occ Extension (9258).'},
+  {id:'ownoc67',name:'To Age 67 Own Occ Extension',policy:'9258',classes:'5,4,3',ages:'18–60',
+   check:(cls,age,st)=>['5','4','3'].includes(cls)&&age<=60&&!['LA','UT'].includes(st)&&['5yr','10yr','67'].includes(document.getElementById('cBP').value),
+   notes:'Own occ definition to age 67. Classes 5/4/3 with To Age 67 benefit period. Not in LA or UT.'},
+  {id:'residual',name:'Residual Disability Benefit',policy:'9261/9263',classes:'5,4,3,2',ages:'18–60',
+   check:(cls,age,st,elim,bp)=>['5','4','3','2'].includes(cls)&&age<=60&&['2yr','5yr','10yr','67'].includes(bp),
+   notes:'Pays benefit for residual disability (loss of ≥20% income). Min $2,000/month income. Not for 6-Mo or 1-Yr benefit periods.'},
+  {id:'integrated',name:'Integrated Monthly Benefit',policy:'9264',classes:'5,4,3,2,1',ages:'18–60',
+   check:(cls,age,st,elim,bp)=>!['CT','NJ'].includes(st)&&age<=60&&['2yr','5yr','10yr','67'].includes(bp),
+   notes:'Additional TD benefit reduced by Social Security, workers comp, Railroad Retirement. Not in CT or NJ.'},
+  {id:'autoincr',name:'Automatic Increase Benefit',policy:'9252',classes:'5,4,3,2,1',ages:'18–50',
+   check:(cls,age,st)=>cls!=='NI'&&age<=50,
+   notes:'Auto-increases benefit 3%/year on first 5 anniversaries. Not available if monthly benefit <$1,000 or policy issued with extra premium. No extra premium for rider.'},
+  {id:'retroinj',name:'Retroactive Injury Benefit',policy:'9253',classes:'5,4,3,2,1',ages:'18–60',
+   check:(cls,age,st)=>cls!=='NI'&&age<=60,
+   notes:'Pays from date of injury if TD occurs within 30 days of injury and continues through elim period. Available for all classes ages 18–60.'},
+  {id:'fullmental',name:'Full Benefits — Mental/Nervous/Substance',policy:'9265',classes:'5,4,3,2,1',ages:'18–60',
+   check:(cls,age,st)=>st!=='CT'&&cls!=='NI'&&age<=60,
+   notes:'Removes 24-month lifetime limit for mental/nervous disorders and alcoholism/drug abuse. Not available in CT.'},
+];
+
+function buildRiders(cls,age,state,checked,elim,bp){
+  const tbl=document.getElementById('riderTable');
+  let html='<tr><th>Rider</th><th>Policy Form</th><th>Classes</th><th>Ages</th><th>Eligible?</th><th>Notes / Restrictions</th></tr>';
+  RIDER_DATA.forEach(r=>{
+    let elig=false;
+    try{elig=r.check(cls,age,state,elim,bp);}catch(e){}
+    const req=checked.includes(r.id);
+    const avCls=elig?'av-y':req?'av-n':'av-n';
+    const avTxt=elig?'✓ Eligible':'✗ Not Eligible';
+    const rowCls=req?(elig?'requested':'requested'):'' ;
+    const flag=req&&!elig?'<span style="background:var(--red);color:white;border-radius:4px;padding:1px 5px;font-size:9px;font-weight:700;margin-left:5px;">REQUESTED</span>':'';
+    const reqBadge=req&&elig?'<span style="background:var(--green);color:white;border-radius:4px;padding:1px 5px;font-size:9px;font-weight:700;margin-left:5px;">REQUESTED</span>':'';
+    html+=`<tr class="${rowCls}"><td><strong>${r.name}</strong>${flag}${reqBadge}</td><td style="font-size:10px;">${r.policy}</td><td style="font-size:10px;">${r.classes}</td><td style="font-size:10px;">${r.ages}</td><td><span class="av ${avCls}">${avTxt}</span></td><td style="font-size:10px;color:var(--muted);line-height:1.5;">${r.notes}</td></tr>`;
+  });
+  tbl.innerHTML=html;
+}
+
+// ─ MUG PLAN ─
+function buildMUG(name,income,benefit){
+  const mort=income?Math.round(income*0.28):0;
+  const util=income?Math.round(income*0.08):0;
+  const groc=income?Math.round(income*0.12):0;
+  const mug=mort+util+groc;
+  document.getElementById('mugMort').textContent=mort?'~$'+mort.toLocaleString()+'/mo':'Est. $?';
+  document.getElementById('mugUtil').textContent=util?'~$'+util.toLocaleString()+'/mo':'Est. $?';
+  document.getElementById('mugGroc').textContent=groc?'~$'+groc.toLocaleString()+'/mo':'Est. $?';
+  document.getElementById('mugTotal').textContent=benefit?'$'+benefit.toLocaleString()+'/mo Benefit':(mug?'Est. $'+mug.toLocaleString()+'/mo needed':'DI Benefit');
+
+  document.getElementById('mugScript').innerHTML=`
+    <div style="background:var(--lb);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:11px 14px;font-size:13px;line-height:1.75;cursor:pointer;" onclick="navigator.clipboard.writeText(this.innerText.replace('📋 AGENT SCRIPT','').trim()).catch(()=>{})" title="Click to copy">
+      <div style="font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;">📋 AGENT SCRIPT — Click to Copy</div>
+      "${name||'[First Name]'}, let me ask you something. If you got sick or hurt tomorrow and couldn't work for 6 months — how would you pay your mortgage${mort?' of about $'+mort.toLocaleString():''}? Your utilities${util?' — around $'+util.toLocaleString():''}? Your groceries${groc?' — about $'+groc.toLocaleString():''}? Those three things — Mortgage, Utilities, Groceries — that's the M.U.G.® plan. Those expenses don't stop just because your paycheck does. That's exactly what disability income insurance is designed to protect — your ability to pay those bills when you're the one who can't go in to work."
+    </div>`;
+
+  const diffPerDay=benefit?((benefit-mug)/30).toFixed(2):null;
+  document.getElementById('jobABScript').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+      <div style="background:#FFE0E0;border:2px solid var(--red);border-radius:9px;padding:12px;text-align:center;">
+        <div style="font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;margin-bottom:5px;">Job A — No DI</div>
+        <div style="font-size:22px;font-weight:800;color:var(--text);">${income?'$'+income.toLocaleString()+'/mo':'$X/mo'}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">If disabled → $0/month</div>
+      </div>
+      <div style="background:var(--lg);border:2px solid var(--green);border-radius:9px;padding:12px;text-align:center;">
+        <div style="font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;margin-bottom:5px;">Job B — With DI</div>
+        <div style="font-size:22px;font-weight:800;color:var(--text);">${income&&benefit?'$'+(income-Math.round(benefit*0.035)).toLocaleString()+'/mo':'$X/mo'}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">If disabled → $${benefit?benefit.toLocaleString():'?'}/month</div>
+      </div>
+    </div>
+    <div style="background:var(--lb);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:11px 14px;font-size:13px;line-height:1.75;cursor:pointer;" onclick="navigator.clipboard.writeText(this.innerText.replace('📋 SCRIPT','').trim()).catch(()=>{})" title="Click to copy">
+      <div style="font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;">📋 SCRIPT — Click to Copy</div>
+      "Which job would you choose — one that pays slightly more but leaves your family with nothing if you're hurt, or one that costs just a little less but guarantees ${benefit?'$'+benefit.toLocaleString():'your income'} every month if you can't work? Most people choose the higher take-home pay. But the second they become disabled, the job without DI leaves their family with zero. The job with DI keeps them whole."
+    </div>`;
+}
+
+// ─ STATE RULES ─
+function buildStateRules(){
+  const state=document.getElementById('cState').value;
+  const el=document.getElementById('stateRulesContent');
+  if(!state){el.innerHTML='<div class="card"><div class="card-body" style="color:var(--muted);text-align:center;padding:30px;">Select a state in the form to see applicable rules.</div></div>';return;}
+  if(UNAVAIL.includes(state)){el.innerHTML=`<div class="banner b-bad"><div class="b-icon">❌</div><div><strong>Illinois Mutual does NOT sell DI in ${state}.</strong> DI105 and BE105 are unavailable. Please refer client to another carrier.</div></div>`;return;}
+
+  const minElim=ELIM_MIN[state]||30;
+  const preEx=['MN','MT','NC','ND','VA'].includes(state)?'1 Year':state==='NH'?'9 Months':'2 Years';
+  const rows=[
+    ['✅','Available','Illinois Mutual DI (DI105 and BE105) available in this state'],
+    [minElim>30?'⚠️':'✅',minElim>30?'Limited':'Standard',`Minimum elimination period: ${minElim} days`],
+    [NO730.includes(state)?'⚠️':'✅',NO730.includes(state)?'N/A':'Available',`730-day elimination period: ${NO730.includes(state)?'NOT available in '+state:'Available'}`],
+    [NO365_90MAX_1YR.includes(state)?'⚠️':'✅',NO365_90MAX_1YR.includes(state)?'Limited':'Standard',`6-Mo / 1-Yr benefit period: ${NO365_90MAX_1YR.includes(state)?'Max 90-day elimination period ('+state+')':'Standard'}` ],
+    [NO180MAX_2YR.includes(state)?'⚠️':'✅',NO180MAX_2YR.includes(state)?'Limited':'Standard',`2-Year benefit period: ${NO180MAX_2YR.includes(state)?'Max 180-day elimination period ('+state+')':'Standard'}`],
+    ['✅','Standard',`Pre-existing condition lookback: ${preEx}`],
+    [state==='CT'?'⚠️':'✅',state==='CT'?'N/A in CT':'Available',`ADL Rider: ${state==='CT'?'NOT available in CT':'Available'}`],
+    [(state==='CT'||state==='MA')?'⚠️':'✅',(state==='CT'||state==='MA')?'N/A':'Available',`Return of Premium Rider: ${(state==='CT'||state==='MA')?'NOT available in '+state:'Available'}`],
+    [(state==='CT'||state==='NJ')?'⚠️':'✅',(state==='CT'||state==='NJ')?'N/A':'Available',`Integrated Monthly Benefit Rider: ${(state==='CT'||state==='NJ')?'NOT available in '+state:'Available'}`],
+    [state==='CT'?'⚠️':'✅',state==='CT'?'N/A in CT':'Available',`Full Mental/Nervous/Substance Rider: ${state==='CT'?'NOT available in CT':'Available'}`],
+    [state==='FL'?'⚠️':'✅',state==='FL'?'Required':'Standard',`Own Occupation Rider: ${state==='FL'?'REQUIRED — FL applicants must purchase 2-Yr or 5-Yr Pure Own Occ rider':'Optional'}`],
+    [(state==='LA'||state==='UT')?'⚠️':'✅',(state==='LA'||state==='UT')?'Differs':'Standard',`Total Disability Definition: ${(state==='LA'||state==='UT')?'DIFFERS in '+state+' — see policy for state-specific language':'Standard definition'}`],
+    [state==='ID'?'⚠️':'✅',state==='ID'?'N/A in ID':'Available',`Organ Donor Benefit: ${state==='ID'?'NOT available in ID':'Available'}`],
+    [(['CT','NH'].includes(state))?'⚠️':'✅',(['CT','NH'].includes(state))?'N/A':'Available',`Accident Insurance WSA07: ${(['CT','NH'].includes(state))?'NOT available with DI105 in '+state:'Available'}`],
+  ];
+
+  let html=`<div class="card"><div class="card-hdr" style="background:var(--navy);">🗺️ State-Specific Rules — ${state}</div><div class="card-body" style="overflow-x:auto;"><table class="otbl"><tr><th></th><th>Status</th><th>Rule / Notes</th></tr>`;
+  rows.forEach(([icon,status,note])=>{html+=`<tr><td style="font-size:16px;">${icon}</td><td style="font-size:11px;font-weight:700;">${status}</td><td style="font-size:11px;">${note}</td></tr>`;});
+  html+=`</table></div></div>`;
+  el.innerHTML=html;
+}
+
+// ─ EXPORT ─
+function exportSummary(){
+  const name=document.getElementById('cName').value||'Client';
+  const age=document.getElementById('cAge').value||'?';
+  const state=document.getElementById('cState').value||'?';
+  const cls=document.getElementById('occClass').value||'?';
+  const income=document.getElementById('cIncome').value||'?';
+  const benefit=document.getElementById('cBenefit').value||'?';
+  const bp=document.getElementById('cBP').value||'?';
+  const elim=document.getElementById('cElim').value||'?';
+  const tobacco=document.getElementById('cTobacco').value;
+  const rows=[
+    ['Field','Value'],
+    ['Client Name',name],['Age',age],['State',state],['Occupation Class',cls],
+    ['Monthly Income','$'+income],['Desired Benefit','$'+benefit],
+    ['Benefit Period',bp],['Elimination Period',elim+' days'],
+    ['Tobacco',tobacco==='yes'?'Yes':'No'],
+    ['Date',new Date().toLocaleDateString()],
+    ['Products Available',UNAVAIL.includes(state)?'NOT AVAILABLE — '+state:'DI105 / BE105 / WSA07'],
+    ['Contact','DI Sales (800) 437-7355 Option 2 | Sales@IllinoisMutual.com'],
+  ];
+  const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv,'+encodeURIComponent(csv);
+  a.download=`IM_DI_${name.replace(/\s+/g,'_')}_${new Date().toLocaleDateString().replace(/\//g,'-')}.csv`;
+  a.click();
+}
+
+function copyClientSummary(){
+  const name=document.getElementById('cName').value||'Client';
+  const age=document.getElementById('cAge').value||'?';
+  const state=document.getElementById('cState').value||'?';
+  const cls=document.getElementById('occClass').value||'?';
+  const income=document.getElementById('cIncome').value||'?';
+  const benefit=document.getElementById('cBenefit').value||'?';
+  const bp=document.getElementById('cBP').value||'?';
+  const elim=document.getElementById('cElim').value||'?';
+  const txt=`ILLINOIS MUTUAL DI QUALIFIER — ${new Date().toLocaleDateString()}
+Client: ${name} | Age: ${age} | State: ${state}
+Occupation Class: ${cls} | Tobacco: ${document.getElementById('cTobacco').value==='yes'?'Yes':'No'}
+Income: $${income}/mo | Desired Benefit: $${benefit}/mo
+Benefit Period: ${bp} | Elimination: ${elim} days
+Products: ${UNAVAIL.includes(state)?'NOT AVAILABLE in '+state:'DI105 / BE105 / WSA07 — see full analysis'}
+Contact: DI Sales (800) 437-7355 Option 2 | Sales@IllinoisMutual.com`;
+  navigator.clipboard.writeText(txt).catch(()=>{});
+  alert('Summary copied to clipboard!');
+}
+
+function resetAll(){
+  document.querySelectorAll('input:not([type=checkbox]),select').forEach(el=>{if(el.id!='cElim')el.value='';});
+  document.querySelectorAll('.chk-item input').forEach(el=>el.checked=false);
+  document.querySelectorAll('.chk-item').forEach(el=>el.classList.remove('on'));
+  document.getElementById('occResult').style.display='none';
+  document.getElementById('stateAlert').className='ia';
+  document.getElementById('ageAlert').className='ia';
+  document.getElementById('incomeAlert').className='ia';
+  document.getElementById('benefitAlert').className='ia';
+  document.getElementById('emptyState').style.display='block';
+  document.getElementById('resultWrap').style.display='none';
+  selectedOcc=null;
+  document.getElementById('cElim').value='30';
+}
+</script>
+</body>
+</html>
